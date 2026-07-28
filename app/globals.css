@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-white text-navy-700 antialiased;
+    font-family: var(--font-sans);
+    font-size: 0.9688rem;
+    line-height: 1.75;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-heading);
+    @apply text-navy-950;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  h1 { @apply text-h1; font-weight: 800; }
+  h2 { @apply text-h2; font-weight: 800; }
+  h3 { @apply text-h3; }
+  h4 { @apply text-h4; }
+
+  p { text-wrap: pretty; }
+
+  /* Chiffres tabulaires pour les statistiques et les prix */
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  ::selection {
+    @apply bg-brand text-white;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-white;
+  }
+}
+
+@layer components {
+  /* ---------- Structure ---------- */
+  .container-x {
+    @apply mx-auto w-full max-w-[80rem] px-5 sm:px-8 lg:px-10;
+  }
+
+  .section {
+    padding-block: clamp(4.5rem, 8.5vw, 8rem);
+  }
+  .section-sm {
+    padding-block: clamp(3.5rem, 6vw, 5.5rem);
+  }
+
+  /* Espace standard entre le titre de section et son contenu */
+  .section-head + * {
+    margin-top: clamp(3rem, 5vw, 4.5rem);
+  }
+
+  /* ---------- Typographie ---------- */
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5 text-eyebrow font-bold uppercase text-brand;
+  }
+  .eyebrow::before,
+  .eyebrow::after {
+    content: '';
+    @apply h-px w-6 bg-brand/45;
+  }
+  .eyebrow-start::after { display: none; }
+
+  .lead {
+    @apply text-lead text-navy-500;
+    max-width: 62ch;
+  }
+
+  .title-underline {
+    @apply relative pb-4;
+  }
+  .title-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-[3px] w-12 rounded-full bg-brand;
+  }
+  .title-underline-center::after {
+    @apply left-1/2 -translate-x-1/2;
+  }
+
+  /* ---------- Boutons ---------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-small font-semibold tracking-[0.005em] transition-all duration-300 ease-smooth;
+  }
+  .btn-primary {
+    @apply btn bg-brand text-white shadow-glow hover:-translate-y-0.5 hover:bg-brand-700;
+  }
+  .btn-navy {
+    @apply btn bg-navy-950 text-white shadow-lift hover:-translate-y-0.5 hover:bg-navy-800;
+  }
+  .btn-outline {
+    @apply btn border border-white/25 bg-white/5 text-white backdrop-blur-sm hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/10;
+  }
+  .btn-ghost {
+    @apply btn border border-navy-200 bg-white text-navy-900 hover:-translate-y-0.5 hover:border-brand hover:text-brand;
+  }
+  .btn-wa {
+    @apply btn bg-[#25D366] text-white shadow-[0_18px_40px_-18px_rgba(37,211,102,.7)] hover:-translate-y-0.5 hover:bg-[#1eb257];
+  }
+  .btn-sm {
+    @apply px-5 py-2.5 text-micro;
+  }
+
+  /* ---------- Cartes ---------- */
+  .card {
+    @apply relative rounded-2xl border border-navy-100 bg-white p-8 shadow-soft transition-all duration-500 ease-smooth;
+  }
+  .card:hover {
+    @apply -translate-y-1.5 border-transparent shadow-lift;
+  }
+
+  .glass {
+    @apply border border-white/10 bg-white/[0.04] backdrop-blur-md;
+  }
+
+  /* ---------- Média ---------- */
+  .media {
+    @apply relative overflow-hidden rounded-2xl bg-navy-100;
+  }
+  .media img {
+    @apply h-full w-full object-cover transition-transform duration-[900ms] ease-smooth;
+  }
+  .media-zoom:hover img {
+    @apply scale-[1.06];
+  }
+  .overlay-bottom {
+    @apply pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/25 to-transparent;
+  }
+  .overlay-dark {
+    @apply pointer-events-none absolute inset-0 bg-navy-950/70;
+  }
+
+  /* ---------- Formulaires ---------- */
+  .field {
+    @apply w-full rounded-xl border border-navy-200 bg-white px-4 py-3.5 text-small text-navy-900 outline-none transition-all duration-200 placeholder:text-navy-300;
+  }
+  .field:focus {
+    @apply border-brand ring-4 ring-brand/10;
+  }
+  .label {
+    @apply mb-2 block text-micro font-semibold uppercase tracking-wider2 text-navy-500;
+  }
+
+  /* ---------- Divers ---------- */
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-navy-200 bg-white px-3.5 py-1.5 text-micro font-semibold text-navy-700;
+  }
+  .divider-red {
+    @apply h-[3px] w-full bg-gradient-to-r from-brand via-brand-700 to-transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .mask-fade-r {
+    -webkit-mask-image: linear-gradient(to right, #000 78%, transparent);
+    mask-image: linear-gradient(to right, #000 78%, transparent);
+  }
+}
+
+/* ---------- Carte Leaflet ---------- */
+.leaflet-container {
+  z-index: 0;
+  isolation: isolate;
+  font-family: var(--font-sans);
+  background: #e2e7f3;
+}
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(6px);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 14px !important;
+  box-shadow: 0 24px 48px -20px rgba(11, 16, 36, 0.35) !important;
+}
+.leaflet-popup-content {
+  margin: 14px 16px !important;
+  line-height: 1.55 !important;
+}
+.leaflet-bar a {
+  color: #18213d !important;
+}
+
+@keyframes ksc-ping {
+  0% { transform: scale(0.85); opacity: 0.75; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: #f2f4fa; }
+::-webkit-scrollbar-thumb {
+  background: #c6d0e7;
+  border: 3px solid #f2f4fa;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: #E4032E; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,42 @@
+# ——— Dépendances ———
+node_modules
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ——— Build ———
+.next
+out
+build
+dist
+*.tsbuildinfo
+next-env.d.ts
+
+# ——— Variables d'environnement ———
+# .env.example est versionné, les vraies clés ne le sont jamais.
+.env
+.env.local
+.env*.local
+.env.production
+
+# ——— Hébergement ———
+.vercel
+.netlify
+
+# ——— Journaux ———
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ——— Système et éditeurs ———
+.DS_Store
+Thumbs.db
+*.pem
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# ——— Tests et couverture ———
+coverage
+.nyc_output
