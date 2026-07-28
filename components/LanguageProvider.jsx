@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { dictionaries, defaultLocale, locales } from '@/lib/dictionaries';
+import { applyContent } from '@/lib/runtime';
 
 const LanguageContext = createContext({
   locale: defaultLocale,
@@ -11,7 +12,11 @@ const LanguageContext = createContext({
 
 const STORAGE_KEY = 'keypro-locale';
 
-export function LanguageProvider({ children }) {
+export function LanguageProvider({ children, content }) {
+  // Le contenu venant de la base remplace celui des fichiers, avant
+  // le premier rendu — sinon on afficherait brièvement l'ancien texte.
+  if (content) applyContent(content);
+
   const [locale, setLocaleState] = useState(defaultLocale);
 
   useEffect(() => {

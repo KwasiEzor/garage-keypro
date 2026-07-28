@@ -6,6 +6,7 @@ import PageHero from '@/components/PageHero';
 import { Magnetic, Rise, SplitText } from '@/components/motion';
 import { site, telHref, displayPhone } from '@/lib/site';
 import { images } from '@/lib/images';
+import { createClient } from '@/lib/supabase/client';
 import LocationMap from '@/components/LocationMap';
 import {
   IconArrow,
@@ -63,9 +64,35 @@ export default function ContactPage() {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  /** Enregistre la demande côté serveur. Silencieux en cas d'échec :
+   *  le visiteur garde toujours le relais e-mail ou WhatsApp. */
+  const saveToDatabase = async () => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
+    try {
+      const supabase = createClient();
+      await supabase.from('quote_requests').insert({
+        name: form.name.trim(),
+        phone: `${site.countryCode} ${form.phone.replace(/^\+?228\s*/, '').trim()}`,
+        email: form.email.trim() || null,
+        vehicle: form.vehicle.trim() || null,
+        service: form.service || null,
+        mode: form.mode || null,
+        preferred_date: form.date || null,
+        message: form.message.trim(),
+        locale,
+        status: 'nouvelle',
+        source: 'site',
+      });
+    } catch {
+      // Base indisponible : on n'interrompt pas le visiteur.
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+    await saveToDatabase();
+
     const subject =
       locale === 'fr'
         ? `Demande de devis — ${form.service || 'Service'} — ${form.name}`
@@ -76,8 +103,9 @@ export default function ContactPage() {
     setSent(true);
   };
 
-  const handleWhatsapp = () => {
+  const handleWhatsapp = async () => {
     if (!validate()) return;
+    await saveToDatabase();
     const header =
       locale === 'fr'
         ? 'Bonjour KEYPRO Service Center, voici ma demande :'

@@ -6,12 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:seed": "node scripts/seed.mjs",
+    "db:admin": "node scripts/create-admin.mjs"
   },
   "dependencies": {
     "next": "^16.2.12",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "@supabase/supabase-js": "^2.58.0",
+    "@supabase/ssr": "^0.7.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",

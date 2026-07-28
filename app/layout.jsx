@@ -1,12 +1,9 @@
 import './globals.css';
 import { Inter, Sora, Anton, Great_Vibes } from 'next/font/google';
 import { LanguageProvider } from '@/components/LanguageProvider';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import WhatsAppButton from '@/components/WhatsAppButton';
-import Chatbot from '@/components/Chatbot';
-import { ScrollProgress } from '@/components/motion';
 import { site } from '@/lib/site';
+import { loadContent } from '@/lib/content';
+import { applyContent } from '@/lib/runtime';
 
 // Corps de texte — très lisible, chiffres nets
 const inter = Inter({
@@ -98,7 +95,11 @@ export const viewport = {
   themeColor: '#0b1024',
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Contenu piloté depuis le tableau de bord ; repli sur les fichiers.
+  const content = await loadContent();
+  applyContent(content);
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'AutoRepair',
@@ -154,14 +155,7 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <LanguageProvider>
-          <ScrollProgress />
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <WhatsAppButton />
-          <Chatbot />
-        </LanguageProvider>
+        <LanguageProvider content={content}>{children}</LanguageProvider>
       </body>
     </html>
   );
