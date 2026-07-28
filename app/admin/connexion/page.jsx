@@ -8,7 +8,7 @@ import Logo from '@/components/Logo';
 import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import SetupNotice from '@/components/admin/SetupNotice';
-import { IconArrow } from '@/components/Icons';
+import { IconArrow, IconEye, IconEyeOff } from '@/components/Icons';
 
 function LoginForm() {
   const router = useRouter();
@@ -19,6 +19,7 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -72,15 +73,27 @@ function LoginForm() {
         <label className="label" htmlFor="password">
           Mot de passe
         </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className="field"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            id="password"
+            type={visible ? 'text' : 'password'}
+            autoComplete="current-password"
+            required
+            className="field pr-12"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => setVisible((v) => !v)}
+            aria-label={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            aria-pressed={visible}
+            title={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-navy-400 transition-colors hover:bg-navy-50 hover:text-navy-900 focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            {visible ? <IconEyeOff className="h-5 w-5" /> : <IconEye className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {error && (

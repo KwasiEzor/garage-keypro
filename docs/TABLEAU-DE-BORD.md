@@ -131,7 +131,31 @@ Le dépôt d'une demande est borné : le visiteur ne choisit ni le statut, ni l'
 
 **Le formulaire public n'a pas de limite de débit.** Rien n'empêche aujourd'hui quelqu'un d'envoyer des centaines de demandes. Si cela devient un problème, ajoutez un CAPTCHA (hCaptcha, Turnstile) ou une limite par adresse IP via une Edge Function.
 
-**Un avertissement de sécurité subsiste volontairement** dans Supabase : la fonction `is_admin()` est appelable par les comptes connectés. Elle ne révèle rien — elle répond seulement « cette personne est-elle administratrice ? » à propos d'elle-même — et les règles de sécurité en dépendent.
+**Un avertissement de sécurité subsiste volontairement** dans Supabase : les fonctions `is_admin()` et `is_owner()` sont appelables par les comptes connectés. Elles ne révèlent rien — elles répondent seulement « cette personne est-elle administratrice / responsable ? » à propos d'elle-même — et les règles de sécurité en dépendent.
+
+### Récursion dans les politiques : le piège à connaître
+
+Une politique posée sur `admin_users` **ne doit jamais interroger `admin_users` directement**. Postgres réévalue la politique pour lire la table, ce qui relance la politique, à l'infini :
+
+```
+ERROR: infinite recursion detected in policy for relation "admin_users"
+```
+
+Le symptôme est trompeur : la connexion réussit, `last_sign_in_at` se met à jour, mais toute lecture du profil échoue — donc le tableau de bord répond « Accès non autorisé » alors que le compte est parfaitement valide.
+
+La parade est de passer par une fonction `SECURITY DEFINER`, qui s'exécute avec les droits de son propriétaire et contourne donc la sécurité au niveau des lignes :
+
+```sql
+create function public.is_owner() returns boolean
+language sql stable security definer set search_path = ''
+as $$ select exists (
+  select 1 from public.admin_users where id = auth.uid() and role = 'owner'
+); $$;
+```
+
+Les politiques de lecture et d'écriture sont aussi **séparées** : les règles d'écriture ne sont jamais évaluées lors d'un simple `select`.
+
+Si vous ajoutez un jour une politique sur `admin_users`, appuyez-vous sur `is_admin()` ou `is_owner()`, jamais sur une sous-requête directe.
 
 ---
 
@@ -150,6 +174,8 @@ Les rôles `owner` et `staff` ont aujourd'hui les mêmes droits sur le contenu e
 Supabase sauvegarde automatiquement la base sur l'offre gratuite, avec 7 jours d'historique. Pour une copie que vous maîtrisez : *Database* → *Backups* → téléchargement manuel, ou `pg_dump` depuis votre machine.
 
 Le dépôt git ne contient **pas** les données d'exploitation — clients, devis et interventions vivent uniquement dans la base.
+
+> **Le schéma non plus n'est pas versionné.** Tables, index et politiques de sécurité existent uniquement dans Supabase, où l'historique des migrations est conservé. Pour un projet appelé à durer, exportez-le dans le dépôt : *Database* → *Migrations*, ou `supabase db dump --schema public > supabase/schema.sql`.
 
 ---
 
@@ -172,6 +198,7 @@ C'est aussi ce qui permet de travailler hors connexion, et ce qui évite qu'une 
 | `/admin` affiche « Tableau de bord non configuré » | `.env.local` absent, ou serveur non redémarré après sa création |
 | `/admin` affiche « Base injoignable » | Projet Supabase en pause — l'offre gratuite endort les projets inactifs au bout d'une semaine |
 | `/admin` renvoie sans cesse à la connexion | Cookies bloqués, ou variables `NEXT_PUBLIC_*` absentes |
+| « Accès non autorisé » alors que le compte existe bien | Voir « Récursion » ci-dessous |
 | « Accès non autorisé » après connexion | Le compte existe mais `npm run db:admin` n'a pas été lancé |
 | L'onglet Contenu dit que la base est vide | `npm run db:seed` n'a pas encore tourné |
 | Le site affiche l'ancien contenu | Le layout est mis en cache — relancez le serveur, ou déployez |

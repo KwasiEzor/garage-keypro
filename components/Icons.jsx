@@ -107,6 +107,22 @@ export const IconClose = (p) => (
   </Svg>
 );
 
+export const IconEye = (p) => (
+  <Svg {...p}>
+    <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+    <circle cx="12" cy="12" r="3.2" />
+  </Svg>
+);
+
+export const IconEyeOff = (p) => (
+  <Svg {...p}>
+    <path d="M9.9 5.8A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3.2 4" />
+    <path d="M6.4 7.6A17.4 17.4 0 0 0 2.5 12S6 18.5 12 18.5a9.4 9.4 0 0 0 4-.86" />
+    <path d="M9.8 9.9a3.2 3.2 0 0 0 4.4 4.5" />
+    <path d="m4 4 16 16" />
+  </Svg>
+);
+
 export const IconChat = (p) => (
   <Svg {...p}>
     <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.5-5A8 8 0 1 1 21 12Z" />
