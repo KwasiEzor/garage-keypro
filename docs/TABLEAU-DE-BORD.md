@@ -127,9 +127,28 @@ La base applique une sécurité au niveau des lignes (*Row Level Security*). Ce 
 
 Le dépôt d'une demande est borné : le visiteur ne choisit ni le statut, ni l'affectation, ni la note interne, et les champs sont limités en longueur.
 
-### Ce qui reste à surveiller
+### Limite de débit du formulaire
 
-**Le formulaire public n'a pas de limite de débit.** Rien n'empêche aujourd'hui quelqu'un d'envoyer des centaines de demandes. Si cela devient un problème, ajoutez un CAPTCHA (hCaptcha, Turnstile) ou une limite par adresse IP via une Edge Function.
+Un déclencheur en base pose deux garde-fous sur les dépôts venant du site :
+
+- **3 demandes par heure** pour un même numéro de téléphone ;
+- **20 demandes par tranche de 10 minutes**, toutes origines confondues.
+
+Les demandes saisies par l'équipe depuis le tableau de bord n'y sont pas soumises — seule la source `site` est concernée.
+
+Le blocage est **invisible pour le visiteur** : le client web ignore l'erreur, et les relais e-mail et WhatsApp continuent de fonctionner. Quelqu'un de légitime qui insiste ne se retrouve donc jamais face à un mur.
+
+Pour ajuster les seuils, modifiez la fonction `limiter_debit_devis()` dans `supabase/schema.sql`, puis appliquez la version modifiée.
+
+> C'est un garde-fou, pas un rempart. Un attaquant décidé changera de numéro. Si le spam devient réellement gênant, ajoutez un CAPTCHA (hCaptcha ou Turnstile, tous deux gratuits) sur le formulaire.
+
+### Ce qui reste à faire côté Supabase
+
+**Activer la protection contre les mots de passe compromis.** Supabase peut vérifier chaque mot de passe contre la base HaveIBeenPwned et refuser ceux qui ont fuité. C'est désactivé par défaut.
+
+*Authentication* → *Sign In / Providers* → section **Password** → cocher **Prevent use of leaked passwords**.
+
+Pendant que vous y êtes, portez la longueur minimale à 10 caractères pour qu'elle corresponde à ce qu'impose déjà le script `db:admin`.
 
 **Un avertissement de sécurité subsiste volontairement** dans Supabase : les fonctions `is_admin()` et `is_owner()` sont appelables par les comptes connectés. Elles ne révèlent rien — elles répondent seulement « cette personne est-elle administratrice / responsable ? » à propos d'elle-même — et les règles de sécurité en dépendent.
 
@@ -175,7 +194,21 @@ Supabase sauvegarde automatiquement la base sur l'offre gratuite, avec 7 jours d
 
 Le dépôt git ne contient **pas** les données d'exploitation — clients, devis et interventions vivent uniquement dans la base.
 
-> **Le schéma non plus n'est pas versionné.** Tables, index et politiques de sécurité existent uniquement dans Supabase, où l'historique des migrations est conservé. Pour un projet appelé à durer, exportez-le dans le dépôt : *Database* → *Migrations*, ou `supabase db dump --schema public > supabase/schema.sql`.
+### Le schéma est versionné
+
+`supabase/schema.sql` décrit la **structure complète** : 17 tables, 35 politiques de sécurité, les index, fonctions et déclencheurs. Il ne contient **aucune donnée client** — c'est délibéré, ces informations n'ont rien à faire dans un dépôt git.
+
+Pour recréer la base à zéro sur un nouveau projet Supabase :
+
+1. Coller `supabase/schema.sql` dans l'éditeur SQL et exécuter
+2. `npm run db:seed` — importe le contenu du site
+3. `npm run db:admin -- …` — crée le premier compte
+
+> Le fichier est prévu pour une **base vide**. Le relancer sur une base existante échouera sur les politiques, que PostgreSQL ne sait pas créer « si elles n'existent pas ». Pour modifier une base en service, écrivez une migration ciblée.
+
+### Ce que couvre la sauvegarde automatique
+
+L'offre gratuite conserve **7 jours** de sauvegardes quotidiennes. C'est suffisant pour rattraper une fausse manœuvre, pas pour un archivage long. Si le fichier client prend de la valeur, exportez-le périodiquement : *Database* → *Backups*, ou `pg_dump` depuis votre machine.
 
 ---
 

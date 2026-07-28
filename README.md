@@ -92,6 +92,9 @@ lib/
 proxy.js                renouvellement de session + protection de /admin
                         (ex-middleware.js, renommé par Next.js 16)
 
+supabase/
+  schema.sql            structure complète de la base (sans aucune donnée)
+
 scripts/
   seed.mjs              npm run db:seed
   create-admin.mjs      npm run db:admin
@@ -112,7 +115,7 @@ Cinq points à finaliser avant la mise en ligne :
 2. **Liens des réseaux sociaux** — les `#` dans `lib/site.js` sont des espaces réservés.
 3. **Vraies photos de l'atelier** — les visuels actuels viennent d'Unsplash. Voir [`docs/CONTENU.md`](docs/CONTENU.md#remplacer-les-photos).
 4. **Compte administrateur** — `npm run db:admin` n'a pas encore été lancé.
-5. **Protection anti-spam du formulaire** — aucune limite de débit aujourd'hui. Voir [`docs/TABLEAU-DE-BORD.md`](docs/TABLEAU-DE-BORD.md#ce-qui-reste-à-surveiller).
+5. **Protection contre les mots de passe compromis** — à activer dans Supabase, deux clics. Voir [`docs/TABLEAU-DE-BORD.md`](docs/TABLEAU-DE-BORD.md#ce-qui-reste-à-faire-côté-supabase).
 
 ---
 
