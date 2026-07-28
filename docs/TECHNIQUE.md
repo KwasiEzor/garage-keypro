@@ -128,6 +128,68 @@ Si Leaflet ne charge pas — réseau coupé, CDN bloqué — un lien direct vers
 
 ---
 
+## Types de base de données
+
+Le projet est en **JavaScript**, mais TypeScript est activé pour une seule
+raison : typer les accès à la base.
+
+`tsconfig.json` est volontairement permissif — `allowJs: true` et surtout
+`checkJs: false`. Les 49 fichiers `.js` et `.jsx` ne sont **pas** analysés,
+ce qui évite des milliers d'erreurs sur du code qui fonctionne. Seuls les
+fichiers `.ts` le sont : `types/database.ts` et `lib/supabase/*`.
+
+### Ce que ça apporte
+
+`types/database.ts` décrit les 17 tables. Le client Supabase en est typé,
+donc l'autocomplétion remonte jusqu'aux composants — y compris dans les
+fichiers `.jsx`, via le service TypeScript de l'éditeur.
+
+```ts
+import type { Row, Insert, Update, QuoteStatus } from '@/types/database';
+
+type Devis = Row<'quote_requests'>;
+type NouveauClient = Insert<'customers'>;
+type MajIntervention = Update<'jobs'>;
+```
+
+Quatre familles d'erreurs sont désormais attrapées avant l'exécution :
+
+| Erreur | Message |
+|---|---|
+| Colonne inexistante | `Property 'telephone' does not exist` |
+| Colonne obligatoire oubliée | `Property 'phone' is missing` |
+| Valeur hors énumération | `Type '"traitee"' is not assignable to type 'QuoteStatus'` |
+| Mauvais type | `Type 'string' is not assignable to type 'number'` |
+
+### Régénérer après une migration
+
+```bash
+npm run db:types     # écrit types/database.generated.ts
+npm run typecheck    # vérifie que rien n'est cassé
+```
+
+Le fichier généré n'est **pas versionné** : c'est une sortie brute, à
+comparer avec `types/database.ts` qui est la version relue et commentée.
+Reportez-y les différences à la main — l'occasion de voir ce qui a changé.
+
+### Pourquoi pas un ORM
+
+Drizzle et Prisma ont été écartés, pour trois raisons :
+
+- **Le projet est en JavaScript.** L'essentiel de leur valeur est l'inférence
+  de types ; sans TypeScript partout, on paie le coût sans le bénéfice.
+- **Ils exigent une connexion Postgres directe**, impossible depuis un
+  navigateur. Les quatre écrans d'administration lisent et écrivent côté
+  client ; il faudrait tous les convertir en Server Actions.
+- **Ils contourneraient la sécurité.** Les 35 politiques RLS vivent dans la
+  base. Une connexion directe avec le rôle `postgres` les ignore : il
+  faudrait réécrire toute l'autorisation en code applicatif.
+
+Les types générés apportent l'essentiel du confort sans toucher à
+l'architecture ni affaiblir la sécurité.
+
+---
+
 ## Le proxy — `proxy.js`
 
 Ce fichier s'appelait `middleware.js` jusqu'à Next.js 16. La convention a été **renommée en `proxy`** : même comportement, nom plus juste — le code s'exécute en amont de l'application, à la frontière réseau, et non « au milieu » comme un middleware Express.

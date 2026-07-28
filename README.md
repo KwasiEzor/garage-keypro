@@ -3,7 +3,7 @@
 Site vitrine du garage **KEYPRO SERVICE CENTER** — Agoè-Nyivé, Lomé (Togo).
 Clés auto, programmation, diagnostic électronique et assistance mobile dans tout le Grand Lomé.
 
-**Next.js** (App Router) · **Tailwind CSS** · **Supabase** · bilingue **FR/EN** · carte interactive · animations au défilement · chatbot · **tableau de bord d'administration**.
+**Next.js** (App Router) · **Tailwind CSS** · **Supabase** typé · bilingue **FR/EN** · carte interactive · animations au défilement · chatbot · **tableau de bord d'administration**.
 
 ---
 
@@ -24,6 +24,8 @@ Le site tourne sur **http://localhost:3000**
 | `npm run lint` | Vérifie le code |
 | `npm run db:seed` | Importe le contenu des fichiers vers la base |
 | `npm run db:admin` | Crée un compte d'accès au tableau de bord |
+| `npm run db:types` | Régénère les types depuis le schéma de la base |
+| `npm run typecheck` | Vérifie les types (`tsc --noEmit`) |
 
 > **Après toute modification de `tailwind.config.js`**, arrêtez le serveur (`Ctrl+C`) et relancez `npm run dev` : le cache `.next` doit être régénéré.
 
@@ -91,6 +93,9 @@ lib/
 
 proxy.js                renouvellement de session + protection de /admin
                         (ex-middleware.js, renommé par Next.js 16)
+
+types/
+  database.ts           types des 17 tables, relus et commentés
 
 supabase/
   schema.sql            structure complète de la base (sans aucune donnée)

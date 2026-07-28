@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import type { User } from '@supabase/supabase-js';
+import type { Database, Row } from '@/types/database';
 import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from './config';
 
 /**
@@ -12,7 +14,7 @@ export async function createClient() {
 
   const cookieStore = await cookies();
 
-  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createServerClient<Database>(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -31,11 +33,24 @@ export async function createClient() {
   });
 }
 
-/**
- * L'utilisateur courant est-il administrateur ?
- * `configured: false` signale que les clés manquent.
- */
-export async function requireAdmin() {
+/** Type du client serveur, pour annoter une variable ou un paramètre. */
+export type SupabaseServerClient = NonNullable<Awaited<ReturnType<typeof createClient>>>;
+
+/** Profil d'administration, tel que stocké en base. */
+export type AdminProfile = Pick<Row<'admin_users'>, 'id' | 'full_name' | 'role'>;
+
+export type AdminCheck = {
+  /** Les clés Supabase sont-elles renseignées ? */
+  configured: boolean;
+  /** La base a-t-elle refusé de répondre ? */
+  unreachable?: boolean;
+  user: User | null;
+  profile: AdminProfile | null;
+  supabase: SupabaseServerClient | null;
+};
+
+/** L'utilisateur courant est-il administrateur ? */
+export async function requireAdmin(): Promise<AdminCheck> {
   const supabase = await createClient();
   if (!supabase) return { configured: false, user: null, profile: null, supabase: null };
 

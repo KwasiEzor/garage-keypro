@@ -12,6 +12,9 @@ dist
 *.tsbuildinfo
 next-env.d.ts
 
+# Types régénérés par npm run db:types — la version relue est types/database.ts
+types/database.generated.ts
+
 # ——— Variables d'environnement ———
 # .env.example est versionné, les vraies clés ne le sont jamais.
 .env
