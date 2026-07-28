@@ -9,10 +9,11 @@ Cochez ces points — les trois premiers sont des espaces réservés à corriger
 - [ ] **Coordonnées GPS exactes** de l'atelier dans `lib/site.js` → `geo` (voir [`CONTENU.md`](CONTENU.md#placer-le-marqueur-sur-la-carte))
 - [ ] **Liens des réseaux sociaux** dans `lib/site.js` → `social` (actuellement des `#`)
 - [ ] **Vraies photos** de l'atelier dans `lib/images.js` (actuellement Unsplash)
-- [ ] `metadataBase` dans `app/layout.jsx` pointe vers le vrai domaine
+- [ ] `metadataBase` dans `app/layout.jsx` **et** `BASE_URL` dans `app/sitemap.js` et `app/robots.js` pointent vers le vrai domaine
 - [ ] Numéro WhatsApp vérifié — envoyez-vous un message test depuis le bouton flottant
-- [ ] Formulaire de contact testé : l'e-mail arrive bien
+- [ ] Formulaire de contact testé : l'e-mail arrive bien, la demande apparaît dans `/admin`, et le consentement est bien enregistré
 - [ ] Horaires à jour dans `lib/site.js` **et** dans `openingHoursSpecification` de `app/layout.jsx`
+- [ ] Hébergeur choisi et reporté dans `/mentions-legales` (voir [`CONFORMITE.md`](CONFORMITE.md#ce-qui-reste-à-faire-manuellement))
 - [ ] `npm run build` passe sans erreur
 - [ ] Testé sur téléphone — c'est là que viendra la majorité des visiteurs
 
@@ -92,7 +93,7 @@ Le prompt est déjà renseigné avec vos services, marques, horaires, téléphon
 
 ## Après la mise en ligne
 
-**Google Search Console** — [search.google.com/search-console](https://search.google.com/search-console), ajoutez le domaine et demandez l'indexation. Les données structurées `AutoRepair` du site permettent d'afficher horaires et téléphone directement dans les résultats.
+**Google Search Console** — [search.google.com/search-console](https://search.google.com/search-console), ajoutez le domaine, soumettez `/sitemap.xml` (généré automatiquement par `app/sitemap.js`) et demandez l'indexation. Les données structurées `AutoRepair` du site permettent d'afficher horaires et téléphone directement dans les résultats. Détails du référencement mis en place : [`CONFORMITE.md`](CONFORMITE.md).
 
 **Fiche Google Business Profile** — c'est ce qui fait apparaître le garage dans Google Maps quand quelqu'un cherche « clé auto Lomé ». Utilisez exactement la même adresse et les mêmes horaires que sur le site : Google compare, et une incohérence pénalise le classement.
 

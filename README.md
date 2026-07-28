@@ -56,6 +56,7 @@ Modifier un texte dans `dictionaries.js` le met à jour partout où il apparaît
 | [`docs/CONTENU.md`](docs/CONTENU.md) | Changer les textes et les photos **dans les fichiers** (contenu par défaut) |
 | [`docs/MARQUE.md`](docs/MARQUE.md) | Le logo, ses déclinaisons, les fichiers à donner à un imprimeur |
 | [`docs/TECHNIQUE.md`](docs/TECHNIQUE.md) | Architecture, système de design, animations, carte, chatbot, multilingue |
+| [`docs/CONFORMITE.md`](docs/CONFORMITE.md) | **SEO** (métadonnées, sitemap, données structurées) et **RGPD** (consentement, cookies, pages légales) |
 | [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) | Mise en ligne, nom de domaine, variables d'environnement, checklist |
 | [`public/charte-de-marque.html`](public/charte-de-marque.html) | Charte graphique à ouvrir dans un navigateur |
 
@@ -66,9 +67,12 @@ Modifier un texte dans `dictionaries.js` le met à jour partout où il apparaît
 ```
 app/
   layout.jsx            html, polices, SEO — charge le contenu depuis la base
-  (site)/               le site public : accueil, services, à propos,
-                        marques, galerie, contact, 404
-  admin/                le tableau de bord privé
+  sitemap.js · robots.js  référencement : /sitemap.xml et /robots.txt
+  (site)/               le site public : accueil, services, à propos, marques,
+                        galerie, contact, mentions légales, politique de
+                        confidentialité, 404 — un page.jsx serveur (métadonnées)
+                        par route, doublé d'un *Client.jsx pour l'interactivité
+  admin/                le tableau de bord privé — layout.jsx : noindex global
     connexion/          page de connexion
     (dashboard)/        vue d'ensemble, devis, interventions, clients, contenu
   api/chat/route.js     backend optionnel du chatbot
@@ -76,6 +80,9 @@ app/
 
 components/
   Header · Footer · Logo · PageHero · CtaBanner
+  BreadcrumbJsonLd.jsx  fil d'Ariane structuré (schema.org) par page
+  LegalContent.jsx      rendu commun des pages légales
+  CookieNotice.jsx      bandeau d'information sur les cookies
   motion.jsx            animations au défilement (parallaxe, compteurs, épinglage)
   LocationMap.jsx       carte Leaflet + géolocalisation
   LanguageProvider.jsx  contexte de langue FR/EN
@@ -114,13 +121,15 @@ public/
 
 ## Ce qui reste à faire
 
-Cinq points à finaliser avant la mise en ligne :
+Sept points à finaliser avant la mise en ligne :
 
 1. **Coordonnées GPS exactes** — le marqueur pointe vers le centre d'Agoè-Nyivé, pas vers l'atelier. Voir [`docs/CONTENU.md`](docs/CONTENU.md#placer-le-marqueur-sur-la-carte).
 2. **Liens des réseaux sociaux** — les `#` dans `lib/site.js` sont des espaces réservés.
 3. **Vraies photos de l'atelier** — les visuels actuels viennent d'Unsplash. Voir [`docs/CONTENU.md`](docs/CONTENU.md#remplacer-les-photos).
 4. **Compte administrateur** — `npm run db:admin` n'a pas encore été lancé.
 5. **Protection contre les mots de passe compromis** — à activer dans Supabase, deux clics. Voir [`docs/TABLEAU-DE-BORD.md`](docs/TABLEAU-DE-BORD.md#ce-qui-reste-à-faire-côté-supabase).
+6. **Nom de domaine définitif** — une fois choisi, mettez à jour `BASE_URL` dans `app/sitemap.js` et `app/robots.js`, et `metadataBase` dans `app/layout.jsx`. Voir [`docs/CONFORMITE.md`](docs/CONFORMITE.md#après-la-mise-en-ligne).
+7. **Mentions légales — hébergeur** — la page `/mentions-legales` cite Vercel ou Netlify au conditionnel ; retirez l'option non retenue une fois l'hébergement choisi. Voir [`docs/CONFORMITE.md`](docs/CONFORMITE.md#ce-qui-reste-à-faire-manuellement).
 
 ---
 

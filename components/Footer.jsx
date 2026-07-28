@@ -169,6 +169,14 @@ export default function Footer() {
             © {year} <span className="font-semibold text-white/65">{site.name}</span>.{' '}
             {t.footer.rights}
           </p>
+          <nav className="flex items-center gap-5">
+            <Link href="/politique-confidentialite" className="transition-colors hover:text-brand-300">
+              {t.footer.privacyPolicy}
+            </Link>
+            <Link href="/mentions-legales" className="transition-colors hover:text-brand-300">
+              {t.footer.legalNotice}
+            </Link>
+          </nav>
           <p className="text-white/30">
             {locale === 'fr' ? 'Photos : Unsplash' : 'Photos: Unsplash'}
           </p>

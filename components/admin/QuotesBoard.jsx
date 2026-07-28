@@ -153,6 +153,7 @@ export default function QuotesBoard({ initial, statut, error }) {
               />
               <Info label="Source" value={QUOTE_SOURCES[active.source] || active.source} />
               <Info label="Langue" value={active.locale === 'en' ? 'Anglais' : 'Français'} />
+              <Info label="Consentement RGPD" value={active.consent ? 'Accepté' : 'Non renseigné'} />
             </div>
 
             <div>

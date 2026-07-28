@@ -213,6 +213,8 @@ create table if not exists public.quote_requests (
   internal_note  text,
   handled_by     uuid references public.admin_users(id) on delete set null,
   handled_at     timestamptz,
+  -- RGPD : consentement au traitement des données, coché sur le formulaire
+  consent        boolean not null default false,
   -- Bornes de saisie : limitent l'abus depuis le formulaire public
   constraint quote_name_len    check (char_length(name)    between 2 and 120),
   constraint quote_phone_len   check (char_length(phone)   between 6 and 40),
@@ -410,6 +412,7 @@ create policy "ecriture admin" on public.media_slots     for all to authenticate
 
 -- ─── Demandes de devis ───
 -- Le visiteur ne choisit ni son statut, ni son affectation, ni la note interne.
+-- RGPD : le consentement (case cochée sur le formulaire) est obligatoire.
 create policy "depot public borne" on public.quote_requests
   for insert to anon, authenticated
   with check (
@@ -418,6 +421,7 @@ create policy "depot public borne" on public.quote_requests
     and handled_by    is null
     and handled_at    is null
     and internal_note is null
+    and consent = true
   );
 
 create policy "lecture admin"     on public.quote_requests for select to authenticated using ((select public.is_admin()));

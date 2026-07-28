@@ -27,21 +27,21 @@ export type Database = {
 
       quote_requests: {
         Row: {
-          created_at: string; email: string | null; handled_at: string | null;
+          consent: boolean; created_at: string; email: string | null; handled_at: string | null;
           handled_by: string | null; id: string; internal_note: string | null;
           locale: string; message: string; mode: string | null; name: string;
           phone: string; preferred_date: string | null; service: string | null;
           source: string; status: string; vehicle: string | null;
         };
         Insert: {
-          created_at?: string; email?: string | null; handled_at?: string | null;
+          consent?: boolean; created_at?: string; email?: string | null; handled_at?: string | null;
           handled_by?: string | null; id?: string; internal_note?: string | null;
           locale?: string; message: string; mode?: string | null; name: string;
           phone: string; preferred_date?: string | null; service?: string | null;
           source?: string; status?: string; vehicle?: string | null;
         };
         Update: {
-          created_at?: string; email?: string | null; handled_at?: string | null;
+          consent?: boolean; created_at?: string; email?: string | null; handled_at?: string | null;
           handled_by?: string | null; id?: string; internal_note?: string | null;
           locale?: string; message?: string; mode?: string | null; name?: string;
           phone?: string; preferred_date?: string | null; service?: string | null;
