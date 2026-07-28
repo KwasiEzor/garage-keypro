@@ -8,6 +8,7 @@ export default async function ContentPage({ searchParams }) {
   const onglet = params?.onglet || 'coordonnees';
 
   const supabase = await createClient();
+  if (!supabase) return null; // le layout affiche déjà la page de configuration
 
   const [settings, zones, textes, services, regions, marques, etapes, avantages, temoignages, galerie, chatbot, medias] =
     await Promise.all([

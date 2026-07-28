@@ -8,6 +8,7 @@ export default async function QuotesPage({ searchParams }) {
   const statut = params?.statut || 'toutes';
 
   const supabase = await createClient();
+  if (!supabase) return null; // le layout affiche déjà la page de configuration
   let query = supabase.from('quote_requests').select('*').order('created_at', { ascending: false }).limit(300);
   if (statut !== 'toutes') query = query.eq('status', statut);
 

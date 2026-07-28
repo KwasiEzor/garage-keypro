@@ -9,6 +9,7 @@ export default async function JobsPage({ searchParams }) {
   const depuis = params?.depuis || null;
 
   const supabase = await createClient();
+  if (!supabase) return null; // le layout affiche déjà la page de configuration
 
   let query = supabase
     .from('jobs')

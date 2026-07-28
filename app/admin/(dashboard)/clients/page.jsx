@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function CustomersPage() {
   const supabase = await createClient();
+  if (!supabase) return null; // le layout affiche déjà la page de configuration
 
   const [customers, vehicles, jobs] = await Promise.all([
     supabase.from('customers').select('*').order('created_at', { ascending: false }).limit(500),

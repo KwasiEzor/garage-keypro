@@ -6,6 +6,8 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 import { createClient } from '@/lib/supabase/client';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
+import SetupNotice from '@/components/admin/SetupNotice';
 import { IconArrow } from '@/components/Icons';
 
 function LoginForm() {
@@ -24,6 +26,12 @@ function LoginForm() {
     setError('');
 
     const supabase = createClient();
+    if (!supabase) {
+      setError('Le tableau de bord n’est pas encore configuré.');
+      setBusy(false);
+      return;
+    }
+
     const { error: authError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
@@ -90,6 +98,8 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  if (!isSupabaseConfigured) return <SetupNotice />;
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-950 px-5 py-16">
       <div className="absolute inset-0 bg-grid-pattern [background-size:46px_46px]" />

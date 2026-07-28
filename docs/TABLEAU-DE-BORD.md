@@ -25,6 +25,9 @@ npm install
 npm run db:seed
 ```
 
+> **Les variables d'environnement ne sont lues qu'au démarrage.** Après avoir créé
+> ou modifié `.env.local`, arrêtez le serveur (`Ctrl+C`) et relancez `npm run dev`.
+
 L'import recopie les textes, services, marques, photos et horaires des fichiers `lib/` vers la base. **L'opération est rejouable** : relancer met à jour, ne duplique pas.
 
 ### 3. Créer votre compte
@@ -152,8 +155,22 @@ Le dépôt git ne contient **pas** les données d'exploitation — clients, devi
 
 ## En cas de problème
 
+### Le site tourne-t-il sans Supabase ?
+
+Oui. Les clés sont **facultatives** :
+
+- sans elles, le site public lit le contenu des fichiers `lib/` et fonctionne normalement ;
+- `/admin` affiche alors une page expliquant comment configurer, au lieu de planter.
+
+C'est aussi ce qui permet de travailler hors connexion, et ce qui évite qu'une panne de base de données ne fasse tomber le site vitrine.
+
+### Tableau des pannes
+
 | Symptôme | Cause probable |
 |---|---|
+| `Your project's URL and Key are required` | Ancienne version : mettez à jour, les clés sont désormais facultatives |
+| `/admin` affiche « Tableau de bord non configuré » | `.env.local` absent, ou serveur non redémarré après sa création |
+| `/admin` affiche « Base injoignable » | Projet Supabase en pause — l'offre gratuite endort les projets inactifs au bout d'une semaine |
 | `/admin` renvoie sans cesse à la connexion | Cookies bloqués, ou variables `NEXT_PUBLIC_*` absentes |
 | « Accès non autorisé » après connexion | Le compte existe mais `npm run db:admin` n'a pas été lancé |
 | L'onglet Contenu dit que la base est vide | `npm run db:seed` n'a pas encore tourné |

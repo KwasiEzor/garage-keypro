@@ -1,39 +1,43 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from '@/lib/supabase/config';
 
 /**
  * Rafraîchit la session à chaque requête et ferme /admin aux visiteurs.
  *
- * La vérification « est-ce un administrateur ? » est refaite dans le layout
- * du tableau de bord et surtout par les règles de sécurité de la base.
- * Le middleware ne fait qu'éviter d'afficher une page vide.
+ * Si les clés Supabase ne sont pas renseignées, le middleware se retire
+ * complètement : le site public doit continuer de fonctionner. Le tableau
+ * de bord affiche alors sa propre page d'explication.
  */
 export async function middleware(request) {
+  if (!isSupabaseConfigured) return NextResponse.next({ request });
+
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
   // Ne jamais retirer cet appel : c'est lui qui renouvelle le jeton.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // Base injoignable : on laisse passer, le layout du tableau de bord tranchera.
+    return response;
+  }
 
   const { pathname } = request.nextUrl;
   const isAdminArea = pathname.startsWith('/admin');

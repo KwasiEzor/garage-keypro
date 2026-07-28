@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function DashboardHome() {
   const supabase = await createClient();
+  if (!supabase) return null; // le layout affiche déjà la page de configuration
 
   const debutDuMois = new Date();
   debutDuMois.setDate(1);

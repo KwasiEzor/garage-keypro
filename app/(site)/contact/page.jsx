@@ -67,9 +67,9 @@ export default function ContactPage() {
   /** Enregistre la demande côté serveur. Silencieux en cas d'échec :
    *  le visiteur garde toujours le relais e-mail ou WhatsApp. */
   const saveToDatabase = async () => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
     try {
       const supabase = createClient();
+      if (!supabase) return; // base non configurée : on garde e-mail et WhatsApp
       await supabase.from('quote_requests').insert({
         name: form.name.trim(),
         phone: `${site.countryCode} ${form.phone.replace(/^\+?228\s*/, '').trim()}`,
