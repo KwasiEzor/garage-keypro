@@ -89,6 +89,9 @@ lib/
   admin/labels.js                         libellés des statuts
   logo.js                                 géométrie du logo
 
+proxy.js                renouvellement de session + protection de /admin
+                        (ex-middleware.js, renommé par Next.js 16)
+
 scripts/
   seed.mjs              npm run db:seed
   create-admin.mjs      npm run db:admin

@@ -5,11 +5,15 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from '@/lib/sup
 /**
  * Rafraîchit la session à chaque requête et ferme /admin aux visiteurs.
  *
- * Si les clés Supabase ne sont pas renseignées, le middleware se retire
+ * Ce fichier s'appelait `middleware.js` jusqu'à Next.js 16. La convention
+ * a été renommée en `proxy` — même comportement, nom plus juste : le code
+ * s'exécute en amont de l'application, à la frontière réseau.
+ *
+ * Si les clés Supabase ne sont pas renseignées, le proxy se retire
  * complètement : le site public doit continuer de fonctionner. Le tableau
  * de bord affiche alors sa propre page d'explication.
  */
-export async function middleware(request) {
+export async function proxy(request) {
   if (!isSupabaseConfigured) return NextResponse.next({ request });
 
   let response = NextResponse.next({ request });

@@ -4,17 +4,22 @@
 
 ## Choix d'architecture
 
-**Next.js App Router**, sans base de données ni CMS. Le contenu vit dans trois fichiers JavaScript (`site.js`, `dictionaries.js`, `images.js`), ce qui donne un site statique, rapide et gratuit à héberger, modifiable par toute personne capable d'éditer du texte.
+**Next.js App Router**, avec un contenu à deux niveaux : les fichiers de `lib/` fournissent la version par défaut, versionnée dans git ; Supabase fournit la version éditable depuis le tableau de bord. Le site lit la base et retombe sur les fichiers si elle est vide, injoignable ou non configurée.
 
-**Aucune dépendance en dehors de Next et React.** Les animations, la carte et le chatbot sont écrits à la main. C'est un choix délibéré : moins de code à charger, aucune mise à jour de sécurité à suivre, aucune bibliothèque qui casse au prochain changement de version majeure.
+Ce choix a une conséquence utile : **une panne de base de données ne fait pas tomber le site vitrine**, et on peut développer hors connexion.
+
+**Les dépendances sont réduites au strict nécessaire** — Next, React et Supabase. Les animations, la carte et le chatbot sont écrits à la main : moins de code à charger, moins de mises à jour de sécurité à suivre, moins de risque qu'une bibliothèque casse au prochain changement de version majeure.
 
 | Besoin | Solution retenue | Alternative écartée |
 |---|---|---|
+| Contenu éditable | Supabase + repli sur fichiers | CMS hébergé, Decap, contenu figé |
 | Animations au défilement | `IntersectionObserver` + `requestAnimationFrame` | Framer Motion, GSAP |
 | Carte | Leaflet chargé depuis un CDN | Google Maps (clé API + facturation) |
 | Multilingue | Contexte React + dictionnaires | `next-intl`, routes `/fr` `/en` |
-| Formulaire | `mailto:` et WhatsApp pré-remplis | Backend, base de données |
+| Devis | Enregistrement en base + relais e-mail et WhatsApp | Formulaire sans trace |
 | Chatbot | Correspondance de mots-clés, API en option | Service tiers payant |
+
+Le détail du tableau de bord et de la base est dans [`TABLEAU-DE-BORD.md`](TABLEAU-DE-BORD.md).
 
 ---
 
@@ -123,6 +128,33 @@ Si Leaflet ne charge pas — réseau coupé, CDN bloqué — un lien direct vers
 
 ---
 
+## Le proxy — `proxy.js`
+
+Ce fichier s'appelait `middleware.js` jusqu'à Next.js 16. La convention a été **renommée en `proxy`** : même comportement, nom plus juste — le code s'exécute en amont de l'application, à la frontière réseau, et non « au milieu » comme un middleware Express.
+
+La migration se résume à deux changements :
+
+```diff
+- // middleware.js
+- export async function middleware(request) {
++ // proxy.js
++ export async function proxy(request) {
+```
+
+L'export `config` avec son `matcher` ne change pas. Un codemod officiel existe si vous rencontrez le cas ailleurs :
+
+```bash
+npx @next/codemod@canary middleware-to-proxy .
+```
+
+Ici, le proxy fait deux choses : il **renouvelle le jeton de session** Supabase à chaque requête — c'est le rôle de `supabase.auth.getUser()`, à ne jamais retirer — et il **redirige vers la connexion** quiconque tente d'ouvrir `/admin` sans session.
+
+Il se retire complètement si les clés Supabase manquent, et laisse passer si la base ne répond pas : c'est le layout du tableau de bord qui tranche alors, avec un message explicite.
+
+> Next.js recommande de **n'utiliser le proxy qu'en dernier recours**. Ici il ne porte aucune logique métier : la véritable protection vient des règles de sécurité de la base et de la vérification refaite dans `app/admin/(dashboard)/layout.jsx`. Le proxy évite seulement d'afficher une page vide.
+
+---
+
 ## Multilingue — `components/LanguageProvider.jsx`
 
 Contexte React simple. Le choix est mémorisé dans `localStorage`, avec détection de la langue du navigateur au premier passage.
@@ -150,7 +182,7 @@ La correspondance locale normalise les accents et la casse, puis retient la rép
 
 ## Le formulaire de contact
 
-Aucun backend. À la validation, le formulaire compose :
+À la validation, la demande est **enregistrée dans la table `quote_requests`** — elle apparaît aussitôt dans le tableau de bord. Si la base n'est pas configurée ou ne répond pas, l'enregistrement est ignoré en silence et le visiteur garde ses deux relais :
 
 - un e-mail pré-rempli (`mailto:`) avec objet et corps structurés, ou
 - un message WhatsApp pré-rempli.
