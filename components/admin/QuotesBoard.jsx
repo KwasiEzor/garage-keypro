@@ -4,9 +4,10 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { QUOTE_SOURCES, QUOTE_STATUS } from '@/lib/admin/labels';
+import { dateTimeFr } from '@/lib/admin/format';
 import {
   Badge, Cell, Field, Modal, PageHead, Panel, Row, Select,
-  Table, Textarea, dateTimeFr,
+  Table, Textarea,
 } from './ui';
 import { IconArrow, IconMail, IconPhone, IconWhatsapp } from '@/components/Icons';
 

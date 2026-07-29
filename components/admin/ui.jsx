@@ -261,27 +261,6 @@ export function Stat({ label, value, tone = 'navy', href }) {
   );
 }
 
-/* ═══════════ Formatage ═══════════ */
-export const fcfa = (n) =>
-  n === null || n === undefined
-    ? '—'
-    : `${Number(n).toLocaleString('fr-FR').replace(/ /g, ' ')} FCFA`;
-
-export const dateFr = (d) =>
-  d
-    ? new Date(d).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      })
-    : '—';
-
-export const dateTimeFr = (d) =>
-  d
-    ? new Date(d).toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : '—';
+// Le formatage (fcfa, dateFr, dateTimeFr) vit dans lib/admin/format.js —
+// ce fichier porte 'use client', un composant serveur ne peut pas appeler
+// une fonction exportée d'ici directement.

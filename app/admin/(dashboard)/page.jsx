@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { Badge, Cell, Panel, Row, Stat, Table, dateTimeFr, fcfa } from '@/components/admin/ui';
+import { Badge, Cell, Panel, Row, Stat, Table } from '@/components/admin/ui';
+import { dateTimeFr, fcfa } from '@/lib/admin/format';
 import { QUOTE_STATUS } from '@/lib/admin/labels';
 
 export const dynamic = 'force-dynamic';
