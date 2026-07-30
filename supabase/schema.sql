@@ -470,9 +470,15 @@ create policy "suppression par le responsable" on public.admin_users
 -- autoriserait en plus le listage de tous les fichiers du bucket (voir
 -- l'avertissement « Public Bucket Allows Listing » du linter Supabase).
 -- L'écriture reste réservée aux administrateurs.
-insert into storage.buckets (id, name, public)
-values ('site-media', 'site-media', true)
-on conflict (id) do nothing;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'site-media', 'site-media', true,
+  8388608, -- 8 Mo — imposé par le bucket, pas seulement côté client
+  array['image/jpeg','image/png','image/webp','image/gif','image/avif']
+)
+on conflict (id) do update set
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
 
 create policy "ecriture admin site-media" on storage.objects
   for insert to authenticated
