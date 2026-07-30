@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import {
   Bilingual, Field, Input, PageHead, Panel, SaveButton, Select, Textarea,
 } from './ui';
+import ImageUpload from './ImageUpload';
 import { IconArrow, IconClose } from '@/components/Icons';
 
 const ONGLETS = [
@@ -422,7 +423,13 @@ function ListeEditable({ titre, description, rows, table, supabase, refresh, cha
               {ouvert === r.id && (
                 <div className="space-y-5 border-t border-navy-100 p-5">
                   {champs.map((c) => (
-                    <ChampEditable key={c.name} champ={c} row={r} onChange={(v) => maj(r.id, c.name, v)} />
+                    <ChampEditable
+                      key={c.name}
+                      champ={c}
+                      row={r}
+                      supabase={supabase}
+                      onChange={(v) => maj(r.id, c.name, v)}
+                    />
                   ))}
 
                   <label className="flex items-center gap-2.5 text-small font-medium text-navy-700">
@@ -469,7 +476,25 @@ function ListeEditable({ titre, description, rows, table, supabase, refresh, cha
   );
 }
 
-function ChampEditable({ champ, row, onChange }) {
+function ChampEditable({ champ, row, supabase, onChange }) {
+  if (champ.type === 'image') {
+    return (
+      <Field label={champ.label} hint={champ.hint}>
+        <ImageUpload
+          value={row[champ.name] || ''}
+          onChange={(v) => onChange({ ...row, [champ.name]: v })}
+          supabase={supabase}
+          folder={champ.folder || 'divers'}
+        />
+        <Input
+          className="mt-2.5"
+          value={row[champ.name] || ''}
+          onChange={(e) => onChange({ ...row, [champ.name]: e.target.value })}
+          placeholder="Ou collez une adresse (https://…)"
+        />
+      </Field>
+    );
+  }
   if (champ.type === 'bilingue') {
     return (
       <Bilingual
@@ -528,7 +553,7 @@ function Services({ rows, supabase, refresh }) {
         { name: 'title', type: 'bilingue', label: 'Titre' },
         { name: 'short', type: 'bilingue', label: 'Résumé', rows: 2 },
         { name: 'details', type: 'liste-bilingue', label: 'Points détaillés' },
-        { name: 'image_url', label: 'Image', hint: 'Adresse complète ou chemin local /photos/…' },
+        { name: 'image_url', type: 'image', folder: 'services', label: 'Image' },
         { name: 'icon', label: 'Icône', hint: 'key · chip · remote · scanner · code · truck' },
       ]}
     />
@@ -550,7 +575,7 @@ function Sections({ etapes, avantages, supabase, refresh }) {
         champs={[
           { name: 'title', type: 'bilingue', label: 'Titre' },
           { name: 'text', type: 'bilingue', label: 'Texte', rows: 2 },
-          { name: 'image_url', label: 'Image' },
+          { name: 'image_url', type: 'image', folder: 'etapes', label: 'Image' },
         ]}
       />
       <ListeEditable
@@ -565,7 +590,7 @@ function Sections({ etapes, avantages, supabase, refresh }) {
         champs={[
           { name: 'title', type: 'bilingue', label: 'Titre' },
           { name: 'text', type: 'bilingue', label: 'Texte', rows: 2 },
-          { name: 'image_url', label: 'Image' },
+          { name: 'image_url', type: 'image', folder: 'avantages', label: 'Image' },
           { name: 'icon', label: 'Icône', hint: 'bolt · tools · globe · sparkle' },
         ]}
       />
@@ -594,22 +619,134 @@ function Temoignages({ rows, supabase, refresh }) {
 }
 
 function Galerie({ rows, supabase, refresh }) {
+  const [items, setItems] = useState([...rows].sort((a, b) => a.position - b.position));
+  const [dragIndex, setDragIndex] = useState(null);
+
+  const patch = (id, champ, valeur) =>
+    setItems((l) => l.map((r) => (r.id === id ? { ...r, [champ]: valeur } : r)));
+
+  const ajouter = async (url) => {
+    const { data, error } = await supabase
+      .from('gallery_items')
+      .insert({ image_url: url, position: items.length, published: true })
+      .select()
+      .single();
+    if (!error && data) setItems((l) => [...l, data]);
+    refresh();
+  };
+
+  const supprimer = async (id) => {
+    if (!confirm('Supprimer définitivement cette photo ?')) return;
+    await supabase.from('gallery_items').delete().eq('id', id);
+    setItems((l) => l.filter((x) => x.id !== id));
+    refresh();
+  };
+
+  const deposer = (index) => {
+    if (dragIndex === null || dragIndex === index) return;
+    setItems((l) => {
+      const suivant = [...l];
+      const [deplace] = suivant.splice(dragIndex, 1);
+      suivant.splice(index, 0, deplace);
+      return suivant.map((r, i) => ({ ...r, position: i }));
+    });
+    setDragIndex(null);
+  };
+
   return (
-    <ListeEditable
-      titre="Galerie"
-      description="Les visuels de la page Galerie."
-      rows={rows}
-      table="gallery_items"
-      supabase={supabase}
-      refresh={refresh}
-      etiquette={(r) => r.caption_fr || r.image_url}
-      vide="Aucune image."
-      champs={[
-        { name: 'image_url', label: 'Image' },
-        { name: 'caption', type: 'bilingue', label: 'Légende' },
-        { name: 'credit', label: 'Crédit photo' },
-      ]}
-    />
+    <div className="space-y-6">
+      <Panel
+        title="Galerie"
+        description="Envoyez une photo, glissez une vignette pour changer l’ordre d’affichage."
+      >
+        <div className="mb-7 rounded-xl border border-dashed border-navy-200 p-5">
+          <span className="label">Ajouter une photo</span>
+          <div className="mt-2">
+            <ImageUpload supabase={supabase} folder="galerie" onChange={ajouter} />
+          </div>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((r, i) => (
+            <div
+              key={r.id}
+              draggable
+              onDragStart={() => setDragIndex(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => deposer(i)}
+              className={`rounded-2xl border border-navy-100 bg-white p-4 transition-opacity ${
+                dragIndex === i ? 'opacity-40' : ''
+              }`}
+            >
+              <div className="relative aspect-[4/3] cursor-grab overflow-hidden rounded-xl bg-navy-50 active:cursor-grabbing">
+                {r.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={r.image_url} alt="" className="h-full w-full object-cover" />
+                )}
+                <span className="absolute left-2 top-2 rounded-full bg-navy-950/70 px-2.5 py-1 text-[10px] font-bold text-white">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                {!r.published && (
+                  <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-navy-600">
+                    masqué
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-4 space-y-3.5">
+                <Bilingual
+                  label="Légende"
+                  fr={r.caption_fr}
+                  en={r.caption_en}
+                  onFr={(v) => patch(r.id, 'caption_fr', v)}
+                  onEn={(v) => patch(r.id, 'caption_en', v)}
+                />
+                <Field label="Crédit photo">
+                  <Input value={r.credit || ''} onChange={(e) => patch(r.id, 'credit', e.target.value)} />
+                </Field>
+
+                <div className="flex items-center justify-between border-t border-navy-50 pt-3.5">
+                  <label className="flex items-center gap-2 text-micro font-medium text-navy-700">
+                    <input
+                      type="checkbox"
+                      checked={r.published !== false}
+                      onChange={(e) => patch(r.id, 'published', e.target.checked)}
+                      className="h-4 w-4 accent-brand"
+                    />
+                    Visible
+                  </label>
+                  <button
+                    onClick={() => supprimer(r.id)}
+                    className="text-micro font-semibold text-brand"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {!items.length && (
+          <p className="rounded-xl border border-dashed border-navy-200 py-10 text-center text-small text-navy-400">
+            Aucune photo. Ajoutez-en une ci-dessus.
+          </p>
+        )}
+      </Panel>
+
+      <SaveButton
+        onSave={async () => {
+          const aEnvoyer = items.map(
+            ({ id, image_url, caption_fr, caption_en, credit, published, position }) => ({
+              id, image_url, caption_fr, caption_en, credit, published, position,
+            })
+          );
+          const { error } = await supabase.from('gallery_items').upsert(aEnvoyer);
+          if (!error) refresh();
+          return error;
+        }}
+      />
+    </div>
   );
 }
 
@@ -664,11 +801,21 @@ function Marques({ regions, marques, supabase, refresh }) {
               </div>
 
               <Field label="Image de la région">
+                <ImageUpload
+                  value={r.image_url || ''}
+                  supabase={supabase}
+                  folder="marques"
+                  onChange={(v) =>
+                    setItems((l) => l.map((x) => (x.id === r.id ? { ...x, image_url: v } : x)))
+                  }
+                />
                 <Input
+                  className="mt-2.5"
                   value={r.image_url || ''}
                   onChange={(e) =>
                     setItems((l) => l.map((x) => (x.id === r.id ? { ...x, image_url: e.target.value } : x)))
                   }
+                  placeholder="Ou collez une adresse (https://…)"
                 />
               </Field>
 
@@ -729,35 +876,35 @@ function Visuels({ rows, supabase, refresh }) {
           {items.map((m) => (
             <div key={m.slot} className="rounded-xl border border-navy-100 p-5">
               <p className="mb-3 font-mono text-[11px] font-semibold text-navy-400">{m.slot}</p>
-              <div className="grid gap-4 lg:grid-cols-[1fr,auto]">
-                <div className="space-y-4">
-                  <Field label="Adresse de l’image">
-                    <Input
-                      value={m.image_url}
-                      onChange={(e) =>
-                        setItems((l) =>
-                          l.map((x) => (x.slot === m.slot ? { ...x, image_url: e.target.value } : x))
-                        )
-                      }
-                    />
-                  </Field>
-                  <Bilingual
-                    label="Description de l’image"
-                    hint="Lue par les lecteurs d’écran et par Google."
-                    fr={m.alt_fr}
-                    en={m.alt_en}
-                    onFr={(v) => setItems((l) => l.map((x) => (x.slot === m.slot ? { ...x, alt_fr: v } : x)))}
-                    onEn={(v) => setItems((l) => l.map((x) => (x.slot === m.slot ? { ...x, alt_en: v } : x)))}
+              <div className="space-y-4">
+                <Field label="Image">
+                  <ImageUpload
+                    value={m.image_url}
+                    supabase={supabase}
+                    folder="visuels"
+                    onChange={(v) =>
+                      setItems((l) => l.map((x) => (x.slot === m.slot ? { ...x, image_url: v } : x)))
+                    }
                   />
-                </div>
-                {m.image_url && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={m.image_url}
-                    alt=""
-                    className="h-28 w-40 shrink-0 rounded-xl object-cover ring-1 ring-navy-100"
+                  <Input
+                    className="mt-2.5"
+                    value={m.image_url}
+                    onChange={(e) =>
+                      setItems((l) =>
+                        l.map((x) => (x.slot === m.slot ? { ...x, image_url: e.target.value } : x))
+                      )
+                    }
+                    placeholder="Ou collez une adresse (https://…)"
                   />
-                )}
+                </Field>
+                <Bilingual
+                  label="Description de l’image"
+                  hint="Lue par les lecteurs d’écran et par Google."
+                  fr={m.alt_fr}
+                  en={m.alt_en}
+                  onFr={(v) => setItems((l) => l.map((x) => (x.slot === m.slot ? { ...x, alt_fr: v } : x)))}
+                  onEn={(v) => setItems((l) => l.map((x) => (x.slot === m.slot ? { ...x, alt_en: v } : x)))}
+                />
               </div>
             </div>
           ))}

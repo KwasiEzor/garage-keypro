@@ -77,7 +77,7 @@ if (user) {
 
 const { error: profileError } = await db
   .from('admin_users')
-  .upsert({ id: user.id, full_name: fullName || email.split('@')[0], role });
+  .upsert({ id: user.id, email, full_name: fullName || email.split('@')[0], role });
 
 if (profileError) {
   console.error(`✗ Profil administrateur — ${profileError.message}`);

@@ -19,9 +19,18 @@ export type Database = {
       /* ─────────────── Exploitation ─────────────── */
 
       admin_users: {
-        Row: { created_at: string; full_name: string | null; id: string; role: string };
-        Insert: { created_at?: string; full_name?: string | null; id: string; role?: string };
-        Update: { created_at?: string; full_name?: string | null; id?: string; role?: string };
+        Row: {
+          created_at: string; email: string | null; full_name: string | null;
+          id: string; role: string;
+        };
+        Insert: {
+          created_at?: string; email?: string | null; full_name?: string | null;
+          id: string; role?: string;
+        };
+        Update: {
+          created_at?: string; email?: string | null; full_name?: string | null;
+          id?: string; role?: string;
+        };
         Relationships: [];
       };
 
@@ -156,18 +165,18 @@ export type Database = {
       settings: {
         Row: {
           address: Json; business_name: string; country_code: string; currency: string;
-          email: string; geo: Json; hours: Json; id: boolean; phones: string[];
-          social: Json; updated_at: string; whatsapp: string;
+          default_locale: string; email: string; geo: Json; hours: Json; id: boolean;
+          phones: string[]; social: Json; timezone: string; updated_at: string; whatsapp: string;
         };
         Insert: {
           address?: Json; business_name?: string; country_code?: string; currency?: string;
-          email: string; geo?: Json; hours?: Json; id?: boolean; phones?: string[];
-          social?: Json; updated_at?: string; whatsapp: string;
+          default_locale?: string; email: string; geo?: Json; hours?: Json; id?: boolean;
+          phones?: string[]; social?: Json; timezone?: string; updated_at?: string; whatsapp: string;
         };
         Update: {
           address?: Json; business_name?: string; country_code?: string; currency?: string;
-          email?: string; geo?: Json; hours?: Json; id?: boolean; phones?: string[];
-          social?: Json; updated_at?: string; whatsapp?: string;
+          default_locale?: string; email?: string; geo?: Json; hours?: Json; id?: boolean;
+          phones?: string[]; social?: Json; timezone?: string; updated_at?: string; whatsapp?: string;
         };
         Relationships: [];
       };

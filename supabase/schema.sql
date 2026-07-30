@@ -73,6 +73,8 @@ create table if not exists public.settings (
   hours         jsonb       not null default '{}'::jsonb,
   social        jsonb       not null default '{}'::jsonb,
   currency      text        not null default 'FCFA',
+  timezone      text        not null default 'Africa/Lome',
+  default_locale text       not null default 'fr' check (default_locale in ('fr','en')),
   updated_at    timestamptz not null default now(),
   constraint settings_singleton check (id)
 );
@@ -190,6 +192,9 @@ create table if not exists public.media_slots (
 create table if not exists public.admin_users (
   id         uuid primary key references auth.users(id) on delete cascade,
   full_name  text,
+  -- Copie de auth.users.email, pour l'afficher dans « Équipe » sans avoir
+  -- à interroger auth.users (inaccessible depuis le client).
+  email      text,
   role       text not null default 'staff' check (role in ('owner','staff')),
   created_at timestamptz not null default now()
 );
@@ -450,3 +455,30 @@ create policy "modification par le responsable" on public.admin_users
 
 create policy "suppression par le responsable" on public.admin_users
   for delete to authenticated using ((select public.is_owner()));
+
+
+-- ═══════════════ STOCKAGE (IMAGES ENVOYÉES DEPUIS LE TABLEAU DE BORD) ═══════════════
+
+-- Bucket public : les images se servent via l'URL publique
+-- (/storage/v1/object/public/...), qui ne passe pas par les policies RLS
+-- ci-dessous. Volontairement, aucune policy SELECT n'est posée sur
+-- storage.objects : elle ne servirait à rien pour l'affichage des images et
+-- autoriserait en plus le listage de tous les fichiers du bucket (voir
+-- l'avertissement « Public Bucket Allows Listing » du linter Supabase).
+-- L'écriture reste réservée aux administrateurs.
+insert into storage.buckets (id, name, public)
+values ('site-media', 'site-media', true)
+on conflict (id) do nothing;
+
+create policy "ecriture admin site-media" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'site-media' and (select public.is_admin()));
+
+create policy "maj admin site-media" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'site-media' and (select public.is_admin()))
+  with check (bucket_id = 'site-media' and (select public.is_admin()));
+
+create policy "suppression admin site-media" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'site-media' and (select public.is_admin()));

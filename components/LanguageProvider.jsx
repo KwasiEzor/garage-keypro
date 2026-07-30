@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { dictionaries, defaultLocale, locales } from '@/lib/dictionaries';
+import { site } from '@/lib/site';
 import { applyContent } from '@/lib/runtime';
 
 const LanguageContext = createContext({
@@ -26,7 +27,15 @@ export function LanguageProvider({ children, content }) {
       return;
     }
     const browser = navigator.language?.slice(0, 2);
-    if (browser && locales.includes(browser)) setLocaleState(browser);
+    if (browser && locales.includes(browser)) {
+      setLocaleState(browser);
+      return;
+    }
+    // Ni choix mémorisé, ni langue de navigateur reconnue : on retombe sur
+    // la langue par défaut réglée depuis /admin/parametres.
+    if (site.defaultLocale && locales.includes(site.defaultLocale)) {
+      setLocaleState(site.defaultLocale);
+    }
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 # Tableau de bord
 
-Un espace privé sur `/admin` pour gérer le contenu du site, les demandes de devis, les interventions et le fichier client — depuis un ordinateur ou un téléphone.
+Un espace privé sur `/admin` pour gérer le contenu du site, les demandes de devis, les interventions, le fichier client, l'équipe et les réglages — depuis un ordinateur ou un téléphone.
 
 ---
 
@@ -16,7 +16,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_vD2ZRIwGfQOcsumruN8GDQ_CrBlMDb3
 SUPABASE_SERVICE_ROLE_KEY=<à récupérer>
 ```
 
-La **clé de service** se trouve dans Supabase → *Project Settings* → *API* → `service_role`. Elle contourne toutes les règles de sécurité : elle ne doit jamais aller dans le navigateur, ni dans git. Elle ne sert qu'aux deux scripts ci-dessous.
+La **clé de service** se trouve dans Supabase → *Project Settings* → *API* → `service_role`. Elle contourne toutes les règles de sécurité : elle ne doit jamais aller dans le navigateur, ni dans git. Elle sert aux deux scripts ci-dessous, ainsi qu'à la route serveur qui crée un compte d'équipe depuis `/admin/parametres` — jamais côté client.
 
 ### 2. Installer et importer le contenu
 
@@ -48,7 +48,7 @@ Puis ouvrez **http://localhost:3000/admin**
 
 ---
 
-## Les cinq espaces
+## Les six espaces
 
 ### Vue d'ensemble
 
@@ -88,13 +88,29 @@ Neuf onglets :
 | Marques | Un visuel par région et la liste des marques |
 | Étapes & avantages | La méthode en quatre étapes et la grille d'avantages |
 | Témoignages | Les avis clients |
-| Galerie | Les images de la page Galerie |
+| Galerie | Les photos de la page Galerie — réorganisables par glisser-déposer |
 | Chatbot | Les mots déclencheurs et les réponses de l'assistant |
 | Visuels | Les images du héros, des bandeaux de page et du collage |
 
 Chaque texte se saisit **en français et en anglais côte à côte**. Si l'anglais reste vide, le français prend le relais.
 
 Les éléments ont une case **« Visible sur le site »** : décochez-la pour masquer sans supprimer.
+
+### Envoyer une image depuis l'ordinateur
+
+Partout où une image est demandée (Services, Étapes & avantages, Marques, Visuels, Galerie), un bouton **« Envoyer une image »** téléverse un fichier directement depuis l'ordinateur ou le téléphone — plus besoin de trouver une adresse (URL) au préalable. Le fichier part vers le bucket Supabase Storage `site-media` (8 Mo maximum).
+
+Le champ adresse reste disponible juste en dessous : une image déjà en ligne (Unsplash, un autre site) peut toujours être collée telle quelle.
+
+Dans l'onglet **Galerie**, l'ajout se fait directement en haut de page, et chaque vignette se réordonne en la faisant glisser à un autre emplacement.
+
+### Paramètres
+
+Trois sections, réunies sur `/admin/parametres` :
+
+- **Équipe** — la liste des personnes autorisées à ouvrir le tableau de bord. Le responsable (`owner`) peut y ajouter un nouveau membre (e-mail, mot de passe provisoire, rôle), changer le rôle de quelqu'un, ou lui retirer l'accès. Un membre `staff` voit la liste sans pouvoir la modifier.
+- **Mon compte** — chaque personne connectée peut y changer son propre mot de passe.
+- **Préférences générales** — devise, fuseau horaire et langue par défaut du site (utilisée quand le navigateur d'un visiteur n'indique ni français ni anglais).
 
 ---
 
@@ -123,7 +139,8 @@ La base applique une sécurité au niveau des lignes (*Row Level Security*). Ce 
 | Contenu publié | Lecture seule | Lecture et écriture |
 | Demandes de devis | **Dépôt uniquement** — ne peut jamais relire | Tout |
 | Clients, véhicules, interventions | Aucun accès | Tout |
-| Comptes d'administration | Aucun accès | Lecture ; création réservée au responsable |
+| Comptes d'administration | Aucun accès | Lecture ; création, modification et suppression réservées au responsable |
+| Images envoyées (bucket `site-media`) | Lecture (URL publique) | Envoi, remplacement et suppression |
 
 Le dépôt d'une demande est borné : le visiteur ne choisit ni le statut, ni l'affectation, ni la note interne, et les champs sont limités en longueur.
 
@@ -180,11 +197,17 @@ Si vous ajoutez un jour une politique sur `admin_users`, appuyez-vous sur `is_ad
 
 ## Ajouter une personne à l'équipe
 
+**Depuis l'interface** (le plus simple) : `/admin/parametres` → **Équipe** → *Ajouter un membre*, réservé au responsable (`owner`). Le mot de passe saisi est provisoire — la personne le change ensuite depuis **Mon compte**.
+
+**En ligne de commande**, utile pour le tout premier compte ou en cas de souci d'accès :
+
 ```bash
 npm run db:admin -- collegue@email.com "MotDePasse" "Prénom Nom" staff
 ```
 
-Les rôles `owner` et `staff` ont aujourd'hui les mêmes droits sur le contenu et l'exploitation ; seul `owner` peut gérer les comptes. Si vous voulez restreindre `staff` — par exemple lui interdire l'accès aux montants — cela se fait dans les règles de sécurité de la base, pas dans l'interface.
+Les rôles `owner` et `staff` ont aujourd'hui les mêmes droits sur le contenu et l'exploitation ; seul `owner` peut gérer les comptes et les préférences de l'équipe. Si vous voulez restreindre `staff` — par exemple lui interdire l'accès aux montants — cela se fait dans les règles de sécurité de la base, pas dans l'interface.
+
+La création d'un compte passe par une route serveur (`app/admin/api/team/route.js`) qui utilise la clé de service — jamais exposée au navigateur — pour créer le compte d'authentification puis son profil. Retirer un membre ou changer son rôle, en revanche, se fait directement depuis le navigateur : ce ne sont que des écritures sur `admin_users`, déjà protégées par ses politiques de sécurité (réservées au responsable).
 
 ---
 
@@ -196,7 +219,7 @@ Le dépôt git ne contient **pas** les données d'exploitation — clients, devi
 
 ### Le schéma est versionné
 
-`supabase/schema.sql` décrit la **structure complète** : 17 tables, 35 politiques de sécurité, les index, fonctions et déclencheurs. Il ne contient **aucune donnée client** — c'est délibéré, ces informations n'ont rien à faire dans un dépôt git.
+`supabase/schema.sql` décrit la **structure complète** : 17 tables, 38 politiques de sécurité (dont 3 sur le stockage des images), les index, fonctions et déclencheurs. Il ne contient **aucune donnée client** — c'est délibéré, ces informations n'ont rien à faire dans un dépôt git.
 
 Pour recréer la base à zéro sur un nouveau projet Supabase :
 

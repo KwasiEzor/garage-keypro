@@ -11,6 +11,7 @@ import {
   IconGlobe,
   IconMenu,
   IconScanner,
+  IconSettings,
   IconSparkle,
   IconTools,
 } from '@/components/Icons';
@@ -21,6 +22,7 @@ const NAV = [
   { href: '/admin/interventions', label: 'Interventions', Icon: IconTools },
   { href: '/admin/clients', label: 'Clients & véhicules', Icon: IconCar },
   { href: '/admin/contenu', label: 'Contenu du site', Icon: IconGlobe },
+  { href: '/admin/parametres', label: 'Paramètres', Icon: IconSettings },
 ];
 
 export default function AdminShell({ profile, email, children }) {

@@ -74,7 +74,9 @@ app/
                         par route, doublé d'un *Client.jsx pour l'interactivité
   admin/                le tableau de bord privé — layout.jsx : noindex global
     connexion/          page de connexion
-    (dashboard)/        vue d'ensemble, devis, interventions, clients, contenu
+    (dashboard)/        vue d'ensemble, devis, interventions, clients,
+                        contenu, paramètres (équipe, mot de passe, préférences)
+    api/team/route.js   création de compte d'équipe (clé de service, owner uniquement)
   api/chat/route.js     backend optionnel du chatbot
   globals.css           design system (classes .btn, .card, .section…)
 
@@ -89,13 +91,15 @@ components/
   Chatbot.jsx           assistant flottant
   WhatsAppButton.jsx    bouton WhatsApp flottant
   Icons.jsx             toutes les icônes SVG
+  admin/                composants du tableau de bord (ContentBoard, CustomersBoard,
+                        JobsBoard, QuotesBoard, SettingsBoard, ImageUpload…)
 
 lib/
   site.js · dictionaries.js · images.js   contenu par défaut
   content.js                              chargement depuis la base, avec repli
   runtime.js                              application du contenu chargé
   supabase/                               clients navigateur et serveur
-  admin/labels.js                         libellés des statuts
+  admin/labels.js · admin/format.js       libellés des statuts, formatage (FCFA, dates)
   logo.js                                 géométrie du logo
 
 proxy.js                renouvellement de session + protection de /admin

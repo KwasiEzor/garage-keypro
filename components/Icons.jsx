@@ -47,6 +47,13 @@ export const IconCode = (p) => (
   </Svg>
 );
 
+export const IconSettings = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18 6l-1.5 1.5M7.5 16.5 6 18M18 18l-1.5-1.5M7.5 7.5 6 6" />
+  </Svg>
+);
+
 export const IconTruck = (p) => (
   <Svg {...p}>
     <path d="M3 7h10v9H3zM13 10h4l3 3v3h-7z" />
