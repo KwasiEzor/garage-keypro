@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Field, Input, PageHead, Panel, SaveButton, Select } from './ui';
 import { IconClose } from '@/components/Icons';
+import { AI_PROVIDERS } from '@/lib/ai-providers';
 
 const FUSEAUX = ['Africa/Lome', 'Africa/Accra', 'Africa/Abidjan', 'UTC'];
 
@@ -254,7 +255,8 @@ function Preferences({ settings, supabase, refresh }) {
     timezone: settings?.timezone || 'Africa/Lome',
     default_locale: settings?.default_locale || 'fr',
     show_whatsapp_button: settings?.show_whatsapp_button ?? true,
-    show_chatbot: settings?.show_chatbot ?? true,
+    show_chatbot: settings?.show_chatbot ?? false,
+    ai_provider: settings?.ai_provider || 'anthropic',
   });
 
   return (
@@ -321,6 +323,25 @@ function Preferences({ settings, supabase, refresh }) {
         </p>
       </div>
 
+      <div className="mt-6 border-t border-navy-100 pt-6">
+        <Field
+          label="Fournisseur IA du chatbot"
+          hint="La clé d’API du fournisseur choisi doit être renseignée en variable d’environnement (jamais ici) — voir .env.example. Sans clé, le chatbot continue de répondre avec les réponses préprogrammées."
+        >
+          <Select
+            value={s.ai_provider}
+            onChange={(e) => setS({ ...s, ai_provider: e.target.value })}
+            className="sm:max-w-xs"
+          >
+            {AI_PROVIDERS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+
       <div className="mt-5">
         <SaveButton
           onSave={async () => {
@@ -332,6 +353,7 @@ function Preferences({ settings, supabase, refresh }) {
                 default_locale: s.default_locale,
                 show_whatsapp_button: s.show_whatsapp_button,
                 show_chatbot: s.show_chatbot,
+                ai_provider: s.ai_provider,
               })
               .eq('id', true);
             if (!error) refresh();

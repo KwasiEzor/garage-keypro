@@ -76,9 +76,16 @@ create table if not exists public.settings (
   timezone      text        not null default 'Africa/Lome',
   default_locale text       not null default 'fr' check (default_locale in ('fr','en')),
   -- Boutons flottants du site public, à masquer ou réafficher depuis
-  -- /admin/parametres sans toucher au code.
+  -- /admin/parametres sans toucher au code. Le chatbot est masqué par
+  -- défaut : à activer explicitement une fois un fournisseur IA configuré
+  -- (ou pour n'utiliser que les réponses préprogrammées).
   show_whatsapp_button boolean not null default true,
-  show_chatbot         boolean not null default true,
+  show_chatbot         boolean not null default false,
+  -- Fournisseur IA utilisé par /api/chat (voir lib/ai-providers.js). La clé
+  -- d'API correspondante vit uniquement en variable d'environnement, jamais
+  -- ici : cette table est lisible par n'importe quel visiteur anonyme.
+  ai_provider   text        not null default 'anthropic'
+    check (ai_provider in ('anthropic','openai','google','gemma','grok','kimi','qwen')),
   updated_at    timestamptz not null default now(),
   constraint settings_singleton check (id)
 );

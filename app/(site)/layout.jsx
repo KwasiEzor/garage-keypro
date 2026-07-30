@@ -3,6 +3,7 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import Chatbot from '@/components/Chatbot';
 import CookieNotice from '@/components/CookieNotice';
+import ScrollToTop from '@/components/ScrollToTop';
 import { ScrollProgress } from '@/components/motion';
 import { site } from '@/lib/site';
 
@@ -13,6 +14,9 @@ import { site } from '@/lib/site';
  * `site.showChatbot`, réglables depuis /admin/parametres. Le tri se fait
  * ici, côté serveur : masqué, le bouton n'est ni rendu ni envoyé au
  * navigateur — pas seulement caché en CSS.
+ *
+ * ScrollToTop est toujours à gauche (jamais sous WhatsApp/Chatbot, à
+ * droite) et s'empile au-dessus du bouton WhatsApp quand il est affiché.
  */
 export default function SiteLayout({ children }) {
   return (
@@ -23,6 +27,7 @@ export default function SiteLayout({ children }) {
       <Footer />
       {site.showWhatsapp && <WhatsAppButton />}
       {site.showChatbot && <Chatbot />}
+      <ScrollToTop stacked={site.showWhatsapp} />
       <CookieNotice />
     </>
   );
