@@ -15,8 +15,9 @@ import { site } from '@/lib/site';
  * ici, côté serveur : masqué, le bouton n'est ni rendu ni envoyé au
  * navigateur — pas seulement caché en CSS.
  *
- * ScrollToTop est toujours à gauche (jamais sous WhatsApp/Chatbot, à
- * droite) et s'empile au-dessus du bouton WhatsApp quand il est affiché.
+ * ScrollToTop est à droite (comme le chatbot, généralement masqué par
+ * défaut donc ce coin est libre) et s'empile au-dessus du chatbot quand
+ * celui-ci est affiché, pour ne jamais se chevaucher.
  */
 export default function SiteLayout({ children }) {
   return (
@@ -27,7 +28,7 @@ export default function SiteLayout({ children }) {
       <Footer />
       {site.showWhatsapp && <WhatsAppButton />}
       {site.showChatbot && <Chatbot />}
-      <ScrollToTop stacked={site.showWhatsapp} />
+      <ScrollToTop stacked={site.showChatbot} />
       <CookieNotice />
     </>
   );

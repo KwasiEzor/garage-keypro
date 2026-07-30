@@ -6,9 +6,11 @@
  * où on en est dans la page, façon jauge plutôt que simple flèche. Repos
  * en douceur : useReducedMotion coupe l'animation et le smooth-scroll.
  *
- * Toujours à gauche (jamais sous WhatsApp/Chatbot, à droite) ; empilé
- * au-dessus du bouton WhatsApp quand celui-ci est affiché (prop `stacked`),
- * sinon posé à sa place habituelle.
+ * Posé à droite (l'emplacement classique) : le chatbot y vit aussi mais
+ * est masqué par défaut, donc ce coin est généralement libre. Le bouton
+ * s'empile au-dessus du chatbot quand celui-ci est affiché (prop
+ * `stacked`), pour ne jamais se chevaucher. Le bouton WhatsApp, lui, reste
+ * seul à gauche.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -17,8 +19,8 @@ import { useReducedMotion } from './motion';
 import { IconArrow } from './Icons';
 
 const THRESHOLD = 560; // px de défilement avant apparition
-const SIZE = 48;
-const RADIUS = 20;
+const SIZE = 52;
+const RADIUS = 22;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const LABEL = { fr: 'Remonter en haut de la page', en: 'Back to top' };
@@ -57,7 +59,7 @@ export default function ScrollToTop({ stacked = false }) {
       onClick={() => window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' })}
       aria-label={LABEL[locale] || LABEL.fr}
       tabIndex={visible ? 0 : -1}
-      className={`fixed left-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-white text-navy-900 shadow-lift ring-1 ring-navy-100 transition-all duration-500 ease-smooth hover:-translate-y-0.5 hover:text-brand ${
+      className={`fixed right-6 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-white text-navy-900 shadow-lift ring-1 ring-navy-100 transition-all duration-500 ease-smooth hover:-translate-y-0.5 hover:text-brand active:scale-95 ${
         stacked ? 'bottom-24' : 'bottom-6'
       } ${
         visible
