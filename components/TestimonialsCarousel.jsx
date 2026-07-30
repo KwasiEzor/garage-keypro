@@ -143,7 +143,7 @@ export default function TestimonialsCarousel({ items, locale = 'fr' }) {
         }}
         onTouchStart={markInteraction}
         onWheel={markInteraction}
-        className="no-scrollbar mask-fade-x flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth rounded-2xl px-[9%] py-3 outline-none sm:px-[15%] md:gap-8 md:px-[22%] lg:px-[30%] focus-visible:ring-2 focus-visible:ring-brand/40 xl:px-[33%]"
+        className="no-scrollbar mask-fade-x flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth rounded-2xl px-4 py-3 outline-none scroll-px-4 sm:gap-6 sm:px-6 sm:scroll-px-6 md:px-8 md:scroll-px-8 focus-visible:ring-2 focus-visible:ring-brand/40"
       >
         {items.map((item, i) => {
           const raw = Math.abs(active - i);
@@ -160,7 +160,7 @@ export default function TestimonialsCarousel({ items, locale = 'fr' }) {
               role="group"
               aria-roledescription="slide"
               aria-label={`${i + 1}/${n}`}
-              className="w-[82%] shrink-0 snap-center sm:w-[70%] md:w-[56%] lg:w-[40%] xl:w-[34%]"
+              className="w-[clamp(260px,82vw,380px)] shrink-0 snap-center sm:w-[clamp(320px,60vw,420px)] md:w-[clamp(340px,46vw,440px)] lg:w-[clamp(360px,34vw,460px)] xl:w-[clamp(380px,28vw,500px)]"
               style={{
                 transform: `scale(${scale})`,
                 opacity,
