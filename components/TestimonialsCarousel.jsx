@@ -92,11 +92,11 @@ export default function TestimonialsCarousel({ items, locale = 'fr' }) {
   }, [n]);
 
   const goTo = useCallback(
-    (index) => {
+    (index, { instant = false } = {}) => {
       if (n === 0) return;
       const wrapped = ((index % n) + n) % n;
       slideRefs.current[wrapped]?.scrollIntoView({
-        behavior: reduced ? 'auto' : 'smooth',
+        behavior: instant || reduced ? 'auto' : 'smooth',
         inline: 'center',
         block: 'nearest',
       });
@@ -104,23 +104,40 @@ export default function TestimonialsCarousel({ items, locale = 'fr' }) {
     [n, reduced]
   );
 
+  // Avance/recule d'UNE carte (flèches, clavier, autoplay). Quand ce pas
+  // franchit le bout de la piste (dernière carte → première, ou l'inverse),
+  // on bascule sur un saut instantané plutôt qu'un smooth-scroll : sinon
+  // le navigateur anime un défilement continu sur TOUTE la largeur de la
+  // piste, traversant chaque carte intermédiaire d'un coup — c'est ce qui
+  // se voyait comme un « bug » au moment où l'automatique bouclait.
+  // Un clic direct sur une puce reste un smooth-scroll normal : c'est un
+  // saut délibéré vers une carte précise, pas un bouclage.
+  const step = useCallback(
+    (direction) => {
+      const target = active + direction;
+      const wrapping = target < 0 || target >= n;
+      goTo(target, { instant: wrapping });
+    },
+    [active, n, goTo]
+  );
+
   // Défilement automatique — une fenêtre de AUTOPLAY_MS par carte active,
   // jamais s'il y a une seule carte, jamais en pause, jamais en mouvement réduit.
   useEffect(() => {
     if (paused || n < 2) return;
-    const id = setInterval(() => goTo(active + 1), AUTOPLAY_MS);
+    const id = setInterval(() => step(1), AUTOPLAY_MS);
     return () => clearInterval(id);
-  }, [active, paused, n, goTo]);
+  }, [paused, n, step]);
 
   const onKeyDown = (e) => {
     if (e.key === 'ArrowRight') {
       e.preventDefault();
       markInteraction();
-      goTo(active + 1);
+      step(1);
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
       markInteraction();
-      goTo(active - 1);
+      step(-1);
     }
   };
 
@@ -207,7 +224,7 @@ export default function TestimonialsCarousel({ items, locale = 'fr' }) {
             type="button"
             onClick={() => {
               markInteraction();
-              goTo(active - 1);
+              step(-1);
             }}
             aria-label={L.prev}
             className="glass absolute left-0 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-white transition-all duration-300 hover:scale-105 hover:bg-white/15 sm:flex sm:-left-1 lg:left-3"
@@ -218,7 +235,7 @@ export default function TestimonialsCarousel({ items, locale = 'fr' }) {
             type="button"
             onClick={() => {
               markInteraction();
-              goTo(active + 1);
+              step(1);
             }}
             aria-label={L.next}
             className="glass absolute right-0 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-white transition-all duration-300 hover:scale-105 hover:bg-white/15 sm:flex sm:-right-1 lg:right-3"
