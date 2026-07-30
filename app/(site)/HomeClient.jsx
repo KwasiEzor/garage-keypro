@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRef } from 'react';
 import { useLanguage } from '@/components/LanguageProvider';
 import CtaBanner from '@/components/CtaBanner';
+import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import {
   Counter,
   Magnetic,
@@ -832,38 +833,9 @@ export default function HomeClient() {
             <SplitText text={h.testimonialsTitle} as="h2" className="mt-4 text-h2 text-white" />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            {h.testimonials.map((item, i) => (
-              <Rise key={item.name} delay={i * 110}>
-                <Spotlight className="h-full rounded-2xl" color="rgba(255,255,255,.07)">
-                  <figure className="glass relative z-10 flex h-full flex-col rounded-2xl p-8 transition-all duration-500 ease-smooth hover:-translate-y-2 hover:bg-white/[0.08]">
-                    <span className="font-heading text-5xl leading-none text-brand/50">“</span>
-                    <blockquote className="-mt-3 flex-1 text-small italic leading-relaxed text-white/75">
-                      {item.quote}
-                    </blockquote>
-
-                    <div className="mt-6 flex gap-0.5 text-brand" aria-label="5/5">
-                      {Array.from({ length: 5 }).map((_, s) => (
-                        <span key={s} aria-hidden="true">
-                          ★
-                        </span>
-                      ))}
-                    </div>
-
-                    <figcaption className="mt-5 flex items-center gap-3.5 border-t border-white/10 pt-5">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand font-heading text-small font-extrabold text-white">
-                        {item.name.charAt(0)}
-                      </span>
-                      <span>
-                        <span className="block text-small font-bold text-white">{item.name}</span>
-                        <span className="block text-micro text-brand-300">{item.role}</span>
-                      </span>
-                    </figcaption>
-                  </figure>
-                </Spotlight>
-              </Rise>
-            ))}
-          </div>
+          <Rise>
+            <TestimonialsCarousel items={h.testimonials} locale={locale} />
+          </Rise>
         </div>
       </section>
 
