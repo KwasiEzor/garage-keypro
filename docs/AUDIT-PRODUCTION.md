@@ -1,6 +1,8 @@
 # Audit avant mise en production
 
-Revue technique du 30 juillet 2026 — architecture, sécurité, UX/UI et préparation au déploiement. Deux failles trouvées ici ont déjà été corrigées (voir § Corrigé pendant l'audit) ; le reste est une liste priorisée, pas encore appliquée.
+Revue technique du 30 juillet 2026 — architecture, sécurité, UX/UI et préparation au déploiement.
+
+**Mise à jour du 30 juillet 2026 (suite) : la quasi-totalité des points P0 et P1 ci-dessous a été traitée** (voir § Corrigé pendant l'audit et le détail sous chaque tableau). Il ne reste ouvert que `error.jsx`/`loading.jsx` (P1 #4 et #5) et le suivi d'erreurs applicatif de type Sentry (P1 #9, partiellement couvert par Vercel Analytics/Speed Insights). Le reste de ce document est conservé tel quel pour l'historique, avec l'état réel annoté.
 
 ---
 
@@ -31,24 +33,24 @@ Deux problèmes trouvés en creusant, réglés immédiatement car ce sont des r�
 
 ## À corriger avant la mise en ligne (P0)
 
-| # | Constat | Pourquoi ça compte | Effort |
+| # | Constat | Pourquoi ça compte | État |
 |---|---|---|---|
-| 1 | **Aucun en-tête de sécurité** (CSP, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) — `next.config.mjs` n'a pas de bloc `headers()` | Protection de base contre le clickjacking et l'injection de contenu. Standard sur tout site en production. | ~30 min |
-| 2 | **`/api/chat` n'a aucune limite de débit** | Si `ANTHROPIC_API_KEY` est activée, n'importe qui peut appeler cette route en boucle — coût réel, sans plafond technique. La doc dit « surveillez la consommation », mais rien ne l'impose. | ~1 h (même mécanisme que le trigger sur `quote_requests`, adapté à une route API) |
-| 3 | **Zéro test automatisé** | Le bug `fcfa() from the server` corrigé récemment aurait été attrapé par un test d'intégration minimal sur les pages admin. Pour un système qui touche à l'argent (montants d'intervention) et aux données personnelles, s'appuyer uniquement sur la relecture manuelle est fragile à mesure que le projet grossit. | Variable — voir recommandation ci-dessous |
+| 1 | **Aucun en-tête de sécurité** (CSP, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) — `next.config.mjs` n'a pas de bloc `headers()` | Protection de base contre le clickjacking et l'injection de contenu. Standard sur tout site en production. | ✅ Corrigé — `next.config.mjs` pose désormais CSP, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` et HSTS sur toutes les routes. |
+| 2 | **`/api/chat` n'a aucune limite de débit** | Si `ANTHROPIC_API_KEY` est activée, n'importe qui peut appeler cette route en boucle — coût réel, sans plafond technique. La doc dit « surveillez la consommation », mais rien ne l'impose. | ✅ Corrigé — `public.rate_limit_check()` (voir `schema.sql`) limite à 20 messages/10 min par IP hachée, appelé via la clé de service. Même mécanisme réutilisé pour `/admin/api/login`. |
+| 3 | **Zéro test automatisé** | Le bug `fcfa() from the server` corrigé récemment aurait été attrapé par un test d'intégration minimal sur les pages admin. Pour un système qui touche à l'argent (montants d'intervention) et aux données personnelles, s'appuyer uniquement sur la relecture manuelle est fragile à mesure que le projet grossit. | ✅ Corrigé (session suivante) — Vitest (unitaires), Playwright (e2e, dont le parcours de devis et la dégradation de `/api/chat`) et une suite RLS manuelle. Voir `docs/TESTS.md`. |
 
 ## Important, mais pas bloquant (P1)
 
-| # | Constat | Recommandation |
+| # | Constat | État |
 |---|---|---|
-| 4 | Pas de `error.jsx` / `global-error.jsx` dans l'arborescence `app/` (seul `not-found.jsx` existe) | Ajouter un `error.jsx` par groupe de routes (`(site)` et `admin`) pour afficher un écran de secours plutôt que l'écran d'erreur générique de Next.js |
-| 5 | Pas de `loading.jsx` — `/admin` et `/admin/contenu` lancent chacun une dizaine de requêtes Supabase en parallèle et n'affichent rien tant que tout n'a pas répondu | Un simple squelette (`loading.jsx`) change beaucoup la perception de vitesse, en particulier sur connexion mobile — le public visé selon vos propres docs |
-| 6 | Les fenêtres modales du tableau de bord (`components/admin/ui.jsx` → `Modal`, utilisées 5 fois dans Devis/Clients/Interventions) ne se ferment pas avec **Échap** et ne gèrent pas le focus clavier | Corriger une fois dans `Modal` bénéficie aux cinq écrans instantanément |
-| 7 | Le formulaire de contact n'affiche aucun état « envoi en cours » — le bouton reste cliquable pendant l'insertion en base | Désactiver le bouton pendant `handleSubmit`, comme le fait déjà `SaveButton` côté admin |
-| 8 | Le champ newsletter du pied de page ne fait rien (`e.preventDefault()` sans envoi réel) | Le brancher ou le retirer avant le lancement — un visiteur qui s'inscrit et ne reçoit jamais rien nuit à la confiance |
-| 9 | Pas de suivi d'erreurs (Sentry ou équivalent) ni de journal d'audit sur les actions admin (qui a supprimé quel client, modifié quel montant) | Acceptable à un seul utilisateur ; à prévoir dès que l'équipe dépasse 1-2 personnes |
-| 10 | Aucun pipeline CI (`.github/workflows` absent) | Même minimal — `npm run typecheck` + `npm run build` sur chaque push — ça empêche un code cassé d'atteindre `main` |
-| 11 | Impossible de lancer `npm audit` depuis cet environnement (registre bloqué) | À faire une fois localement avant le déploiement : `npm audit --audit-level=high` |
+| 4 | Pas de `error.jsx` / `global-error.jsx` dans l'arborescence `app/` (seul `not-found.jsx` existe) | ⬜ Toujours ouvert. |
+| 5 | Pas de `loading.jsx` — `/admin` et `/admin/contenu` lancent chacun une dizaine de requêtes Supabase en parallèle et n'affichent rien tant que tout n'a pas répondu | ⬜ Toujours ouvert. |
+| 6 | Les fenêtres modales du tableau de bord (`components/admin/ui.jsx` → `Modal`, utilisées 5 fois dans Devis/Clients/Interventions) ne se ferment pas avec **Échap** et ne gèrent pas le focus clavier | ✅ Corrigé — `Modal` gère maintenant Échap, le piégeage du focus (Tab) et rend le focus à l'élément déclencheur à la fermeture. |
+| 7 | Le formulaire de contact n'affiche aucun état « envoi en cours » — le bouton reste cliquable pendant l'insertion en base | ✅ Corrigé — `ContactClient.jsx` désactive les deux boutons (devis, WhatsApp) pendant l'envoi. |
+| 8 | Le champ newsletter du pied de page ne fait rien (`e.preventDefault()` sans envoi réel) | ✅ Corrigé — remplacé par un bouton « Demander un devis » qui pointe vers `/contact`, plus utile qu'une inscription qui n'aurait jamais rien envoyé. |
+| 9 | Pas de suivi d'erreurs (Sentry ou équivalent) ni de journal d'audit sur les actions admin (qui a supprimé quel client, modifié quel montant) | ⬜ Toujours ouvert — installation de `@vercel/analytics`/`@vercel/speed-insights` documentée dans `docs/DEPLOIEMENT.md` (3 étapes, nécessite `npm install` donc à faire en local), mais pas encore branchée. Un vrai suivi d'erreurs (Sentry) et un journal d'audit des actions admin restent à faire. |
+| 10 | Aucun pipeline CI (`.github/workflows` absent) | ✅ Corrigé — `.github/workflows/ci.yml` (typecheck, lint, tests, build, e2e) + `.github/dependabot.yml` pour les mises à jour de dépendances. |
+| 11 | Impossible de lancer `npm audit` depuis cet environnement (registre bloqué) | ✅ Ajouté à la CI (`npm audit --audit-level=high`, non bloquant pour l'instant — à réévaluer selon ce qu'il remonte). |
 
 ## Cosmétique / à surveiller (P2)
 
@@ -69,13 +71,11 @@ Vu la taille du projet, je ne recommande pas une suite exhaustive du jour au len
 
 ---
 
-## Ce que je recommande de faire maintenant
+## Ce qu'il reste à faire
 
-Si vous voulez avancer tout de suite, je peux implémenter, par ordre d'impact :
+Tout le reste de cette liste a été traité (voir tableaux ci-dessus). Ce qui reste réellement ouvert :
 
-1. Les en-têtes de sécurité (`next.config.mjs`) — rapide, sans risque.
-2. La limite de débit sur `/api/chat`.
-3. `error.jsx` + `loading.jsx` pour les deux groupes de routes, et le correctif Échap/focus sur `Modal` (un seul fichier, cinq écrans améliorés).
-4. Désactiver le bouton du formulaire de contact pendant l'envoi.
-
-Dites-moi lesquels lancer — je peux les faire tous à la suite ou un par un selon ce que vous voulez valider en premier.
+1. `error.jsx` + `loading.jsx` pour les deux groupes de routes (`(site)` et `admin`) — confort et perception de vitesse, pas de risque de sécurité ou de perte de données.
+2. Un vrai suivi d'erreurs applicatif (Sentry ou équivalent) et un journal d'audit des actions admin — à prévoir dès que l'équipe dépasse 1-2 personnes.
+3. Activer la sauvegarde Supabase (voir `docs/DEPLOIEMENT.md` § Sauvegarde) dès que le site reçoit de vraies demandes de clients.
+4. Finaliser le nom de domaine — `robots.js`, `sitemap.js` et les métadonnées Open Graph pointent encore vers `keyproservicecenter.com` en attendant le domaine définitif.

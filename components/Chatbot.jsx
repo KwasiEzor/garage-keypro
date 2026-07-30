@@ -37,6 +37,9 @@ export default function Chatbot() {
   const [busy, setBusy] = useState(false);
   const [messages, setMessages] = useState([]);
   const endRef = useRef(null);
+  const dialogRef = useRef(null);
+  const toggleRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Réinitialise le message d'accueil au changement de langue
   useEffect(() => {
@@ -46,6 +49,42 @@ export default function Chatbot() {
   useEffect(() => {
     if (open) endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, open]);
+
+  // Gestion du focus : à l'ouverture, on envoie le focus dans la fenêtre
+  // (champ de saisie) ; à la fermeture, on le rend au bouton flottant —
+  // sans quoi le clavier/lecteur d'écran perd le fil.
+  useEffect(() => {
+    if (open) {
+      const id = setTimeout(() => inputRef.current?.focus(), 60);
+      return () => clearTimeout(id);
+    }
+    toggleRef.current?.focus();
+  }, [open]);
+
+  /** Échap referme la fenêtre ; Tab reste piégé à l'intérieur pendant
+   *  qu'elle est ouverte (fenêtre modale flottante, pas de superposition
+   *  qui bloque le reste de la page). */
+  function onDialogKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      setOpen(false);
+      return;
+    }
+    if (e.key !== 'Tab' || !dialogRef.current) return;
+    const focusables = Array.from(
+      dialogRef.current.querySelectorAll('button:not(:disabled), [href], input, select, textarea')
+    );
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
 
   async function send(text) {
     const question = text.trim();
@@ -84,8 +123,10 @@ export default function Chatbot() {
     <>
       {/* Bouton flottant */}
       <button
+        ref={toggleRef}
         onClick={() => setOpen((v) => !v)}
         aria-label={dict.title}
+        aria-expanded={open}
         className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-glow transition-all duration-300 ease-smooth hover:-translate-y-0.5 hover:bg-brand-700"
       >
         {open ? <IconClose className="h-6 w-6" /> : <IconChat className="h-6 w-6" />}
@@ -99,12 +140,16 @@ export default function Chatbot() {
 
       {/* Fenêtre de chat */}
       <div
+        ref={dialogRef}
+        onKeyDown={onDialogKeyDown}
+        inert={!open ? '' : undefined}
         className={`fixed bottom-24 right-6 z-40 flex w-[min(390px,calc(100vw-3rem))] flex-col overflow-hidden rounded-2xl border border-navy-100 bg-white shadow-lift transition-all duration-500 ease-smooth ${
           open
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none translate-y-4 opacity-0'
         }`}
         role="dialog"
+        aria-modal="true"
         aria-label={dict.title}
       >
         <div className="flex items-center gap-3 bg-navy-900 px-4 py-3.5 text-white">
@@ -125,7 +170,12 @@ export default function Chatbot() {
           </button>
         </div>
 
-        <div className="max-h-[46vh] min-h-[220px] space-y-3 overflow-y-auto bg-navy-50/50 px-4 py-4">
+        <div
+          role="log"
+          aria-live="polite"
+          aria-atomic="false"
+          className="max-h-[46vh] min-h-[220px] space-y-3 overflow-y-auto bg-navy-50/50 px-4 py-4"
+        >
           {messages.map((m, i) => (
             <div
               key={i}
@@ -180,9 +230,11 @@ export default function Chatbot() {
           className="flex items-center gap-2 border-t border-navy-100 bg-white px-3 py-3"
         >
           <input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={dict.placeholder}
+            aria-label={dict.placeholder}
             className="flex-1 rounded-full border border-navy-200 px-4 py-3 text-small outline-none transition-colors focus:border-brand"
           />
           <button

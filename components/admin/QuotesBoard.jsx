@@ -26,6 +26,7 @@ export default function QuotesBoard({ initial, statut, error }) {
   const [active, setActive] = useState(null);
   const [recherche, setRecherche] = useState('');
   const [busy, setBusy] = useState(false);
+  const [patchError, setPatchError] = useState('');
 
   const visibles = useMemo(() => {
     const q = recherche.trim().toLowerCase();
@@ -39,6 +40,7 @@ export default function QuotesBoard({ initial, statut, error }) {
 
   async function patch(id, changes) {
     setBusy(true);
+    setPatchError('');
     const supabase = createClient();
     const { data, error: err } = await supabase
       .from('quote_requests')
@@ -49,7 +51,7 @@ export default function QuotesBoard({ initial, statut, error }) {
     setBusy(false);
 
     if (err) {
-      alert(`Échec de la mise à jour : ${err.message}`);
+      setPatchError(`Échec de la mise à jour : ${err.message}`);
       return;
     }
     setRows((list) => list.map((r) => (r.id === id ? data : r)));
@@ -118,7 +120,13 @@ export default function QuotesBoard({ initial, statut, error }) {
             ? visibles.map((r) => {
                 const s = QUOTE_STATUS[r.status] || { label: r.status, tone: 'neutre' };
                 return (
-                  <Row key={r.id} onClick={() => setActive(r)}>
+                  <Row
+                    key={r.id}
+                    onClick={() => {
+                      setActive(r);
+                      setPatchError('');
+                    }}
+                  >
                     <Cell className="whitespace-nowrap text-navy-500">
                       {dateTimeFr(r.created_at)}
                     </Cell>
@@ -140,6 +148,12 @@ export default function QuotesBoard({ initial, statut, error }) {
       <Modal open={!!active} onClose={() => setActive(null)} title="Demande de devis" wide>
         {active && (
           <div className="space-y-6">
+            {patchError && (
+              <p role="alert" className="rounded-xl bg-brand/10 px-4 py-3 text-small font-medium text-brand-700">
+                {patchError}
+              </p>
+            )}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <Info label="Client" value={active.name} />
               <Info label="Reçue le" value={dateTimeFr(active.created_at)} />
@@ -184,6 +198,7 @@ export default function QuotesBoard({ initial, statut, error }) {
               <Textarea
                 rows={3}
                 defaultValue={active.internal_note || ''}
+                disabled={busy}
                 onBlur={(e) =>
                   e.target.value !== (active.internal_note || '') &&
                   patch(active.id, { internal_note: e.target.value })

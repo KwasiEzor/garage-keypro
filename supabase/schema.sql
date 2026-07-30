@@ -335,6 +335,51 @@ end;
 $$;
 
 
+-- ═══════════════ LIMITEUR DE DÉBIT GÉNÉRIQUE ═══════════════
+--
+-- Réutilisé par /api/chat (anti-abus sur le proxy IA, facturé à l'appel) et
+-- par /admin/api/login (anti-brute-force). N'est jamais accessible depuis le
+-- client : ni policy pour anon/authenticated, ni droit d'exécution accordé à
+-- ces rôles. Seule la clé de service (SUPABASE_SERVICE_ROLE_KEY, utilisée
+-- uniquement côté serveur) peut l'appeler, puisqu'elle contourne RLS.
+
+create table if not exists public.rate_limit_hits (
+  id         bigserial primary key,
+  scope      text not null,
+  key        text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists rate_limit_hits_lookup_idx
+  on public.rate_limit_hits(scope, key, created_at desc);
+
+create or replace function public.rate_limit_check(
+  p_scope  text,
+  p_key    text,
+  p_limit  integer,
+  p_window interval
+)
+returns boolean language plpgsql security definer set search_path = '' as $$
+declare
+  recent integer;
+begin
+  -- Purge opportuniste des vieilles lignes de ce scope (pas de cron requis)
+  delete from public.rate_limit_hits
+  where scope = p_scope and created_at < now() - p_window - interval '1 hour';
+
+  select count(*) into recent
+  from public.rate_limit_hits
+  where scope = p_scope and key = p_key and created_at > now() - p_window;
+
+  if recent >= p_limit then
+    return false;
+  end if;
+
+  insert into public.rate_limit_hits (scope, key) values (p_scope, p_key);
+  return true;
+end;
+$$;
+
+
 -- ═══════════════════════ DÉCLENCHEURS ═══════════════════════
 
 drop trigger if exists settings_touch    on public.settings;
@@ -364,6 +409,9 @@ create trigger quote_requests_debit before insert on public.quote_requests for e
 revoke all on function public.touch_updated_at()     from public, anon, authenticated;
 revoke all on function public.set_job_reference()    from public, anon, authenticated;
 revoke all on function public.limiter_debit_devis()  from public, anon, authenticated;
+
+revoke all on function public.rate_limit_check(text, text, integer, interval) from public, anon, authenticated;
+grant execute on function public.rate_limit_check(text, text, integer, interval) to service_role;
 
 -- is_admin() et is_owner() sont évaluées par les politiques des comptes
 -- connectés. Les visiteurs anonymes n'en ont jamais besoin.
@@ -397,6 +445,9 @@ alter table public.quote_requests  enable row level security;
 alter table public.customers       enable row level security;
 alter table public.vehicles        enable row level security;
 alter table public.jobs            enable row level security;
+alter table public.rate_limit_hits enable row level security;
+-- Volontairement aucune policy sur rate_limit_hits : la table est invisible
+-- pour anon et authenticated. Seul service_role (qui contourne RLS) y touche.
 
 -- ─── Contenu : lecture publique ───
 create policy "lecture publique" on public.settings       for select to anon, authenticated using (true);

@@ -97,12 +97,20 @@ Le prompt est déjà renseigné avec vos services, marques, horaires, téléphon
 
 **Fiche Google Business Profile** — c'est ce qui fait apparaître le garage dans Google Maps quand quelqu'un cherche « clé auto Lomé ». Utilisez exactement la même adresse et les mêmes horaires que sur le site : Google compare, et une incohérence pénalise le classement.
 
-**Analytics** — Vercel Analytics s'active en un clic dans le tableau de bord, sans cookie ni bandeau de consentement.
+**Analytics** — pas encore installé (ça demande `npm install`, donc un accès réseau que l'environnement de développement assisté n'a pas). Trois étapes, cinq minutes, à faire une fois en local :
+1. `npm install @vercel/analytics @vercel/speed-insights`
+2. Dans `app/layout.jsx`, ajouter `import { Analytics } from '@vercel/analytics/react';` et `import { SpeedInsights } from '@vercel/speed-insights/next';` en haut du fichier, puis `<Analytics />` et `<SpeedInsights />` juste avant `</body>`.
+3. Une fois déployé, activer la collecte dans l'onglet **Analytics** du projet, tableau de bord Vercel — aucun cookie, aucun bandeau de consentement nécessaire.
 
 ---
 
 ## Sauvegarde
 
-Le dépôt Git **est** la sauvegarde. Poussez-le sur GitHub, GitLab ou Bitbucket — un dépôt privé suffit et reste gratuit.
+**Le dépôt Git ne sauvegarde que le code — jamais les données.** Poussez-le sur GitHub, GitLab ou Bitbucket (un dépôt privé suffit et reste gratuit) pour retrouver le site à l'identique en cas de problème. Mais les demandes de devis, clients, véhicules et interventions saisies depuis le tableau de bord vivent uniquement dans Supabase : sans sauvegarde de la base, un incident (erreur humaine, panne, suppression accidentelle) les perd définitivement.
+
+**Activez la sauvegarde Supabase dès que le site reçoit de vraies demandes de clients :**
+1. Tableau de bord Supabase → **Database → Backups**.
+2. Le plan gratuit conserve des sauvegardes quotidiennes automatiques (rétention courte) — suffisant au tout début.
+3. Dès que le volume de demandes devient significatif, passez au plan Pro pour activer la **Point-in-Time Recovery (PITR)** : restauration à n'importe quelle minute des 7 à 28 derniers jours, pas seulement au dernier instantané quotidien.
 
 Ce qui n'est pas dans Git : `node_modules` et `.next` se régénèrent avec `npm install` et `npm run build`. Le fichier `.env.local` n'est pas versionné : **notez vos clés API ailleurs**, en lieu sûr.

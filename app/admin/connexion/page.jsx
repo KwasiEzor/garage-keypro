@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
-import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import SetupNotice from '@/components/admin/SetupNotice';
 import { IconArrow, IconEye, IconEyeOff } from '@/components/Icons';
@@ -26,24 +25,21 @@ function LoginForm() {
     setBusy(true);
     setError('');
 
-    const supabase = createClient();
-    if (!supabase) {
-      setError('Le tableau de bord n’est pas encore configuré.');
-      setBusy(false);
-      return;
-    }
+    try {
+      const res = await fetch('/admin/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const data = await res.json().catch(() => ({}));
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-
-    if (authError) {
-      setError(
-        authError.message === 'Invalid login credentials'
-          ? 'E-mail ou mot de passe incorrect.'
-          : authError.message
-      );
+      if (!res.ok) {
+        setError(data.error || 'Connexion impossible. Réessayez.');
+        setBusy(false);
+        return;
+      }
+    } catch {
+      setError('Connexion impossible. Réessayez.');
       setBusy(false);
       return;
     }

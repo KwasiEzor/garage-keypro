@@ -37,6 +37,7 @@ export default function ContactClient() {
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const toggleConsent = () => setForm((f) => ({ ...f, consent: !f.consent }));
@@ -98,7 +99,8 @@ export default function ContactClient() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate() || sending) return;
+    setSending(true);
     await saveToDatabase();
 
     const subject =
@@ -109,10 +111,12 @@ export default function ContactClient() {
       subject
     )}&body=${encodeURIComponent(buildSummary())}`;
     setSent(true);
+    setSending(false);
   };
 
   const handleWhatsapp = async () => {
-    if (!validate()) return;
+    if (!validate() || sending) return;
+    setSending(true);
     await saveToDatabase();
     const header =
       locale === 'fr'
@@ -123,6 +127,7 @@ export default function ContactClient() {
       '_blank'
     );
     setSent(true);
+    setSending(false);
   };
 
   const infos = [
@@ -299,17 +304,25 @@ export default function ContactClient() {
                 </label>
 
                 {error && (
-                  <p className="rounded-xl bg-brand/10 px-4 py-3.5 text-small font-medium text-brand-700 sm:col-span-2">
+                  <p
+                    role="alert"
+                    className="rounded-xl bg-brand/10 px-4 py-3.5 text-small font-medium text-brand-700 sm:col-span-2"
+                  >
                     {error}
                   </p>
                 )}
 
                 <div className="flex flex-wrap gap-3 pt-1 sm:col-span-2">
-                  <button type="submit" className="btn-primary">
-                    {c.submit}
-                    <IconArrow className="h-4 w-4" />
+                  <button type="submit" disabled={sending} className="btn-primary disabled:opacity-60">
+                    {sending ? (locale === 'fr' ? 'Envoi…' : 'Sending…') : c.submit}
+                    {!sending && <IconArrow className="h-4 w-4" />}
                   </button>
-                  <button type="button" onClick={handleWhatsapp} className="btn-wa">
+                  <button
+                    type="button"
+                    onClick={handleWhatsapp}
+                    disabled={sending}
+                    className="btn-wa disabled:opacity-60"
+                  >
                     <IconWhatsapp className="h-4 w-4" />
                     {c.orWhatsapp}
                   </button>

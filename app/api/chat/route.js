@@ -7,12 +7,53 @@
 // toujours en variable d'environnement — jamais en base, jamais envoyées
 // au navigateur (voir .env.example pour la liste complète).
 
+import { createHash } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from '@/lib/supabase/config';
 import { site } from '@/lib/site';
 import { AI_PROVIDER_IDS } from '@/lib/ai-providers';
 
 export const runtime = 'nodejs';
+
+// Cette route proxy des fournisseurs IA payants à l'appel : sans garde-fou,
+// n'importe quel visiteur (ou script) peut faire gonfler la facture. La
+// fonction rate_limit_check() (voir supabase/schema.sql) est appelée avec la
+// clé de service, jamais exposée au navigateur — elle contourne RLS, ce qui
+// est voulu ici : c'est un compteur d'abus, pas une donnée métier.
+const CHAT_RATE_LIMIT = 20; // messages
+const CHAT_RATE_WINDOW = '10 minutes';
+
+/** IP du visiteur, hachée avant stockage — jamais l'adresse en clair. */
+function clientIpHash(request) {
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = (forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip')) || 'inconnue';
+  return createHash('sha256').update(ip.trim()).digest('hex');
+}
+
+/**
+ * `true` si la requête peut continuer. En cas de doute (base non
+ * configurée, clé de service absente, erreur réseau), on laisse passer :
+ * un chatbot qui refuse de répondre à cause d'un souci technique est pire
+ * qu'un chatbot qui, au pire, se fait un peu abuser.
+ */
+async function withinRateLimit(ipHash) {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!isSupabaseConfigured || !serviceKey) return true;
+
+  try {
+    const admin = createClient(SUPABASE_URL, serviceKey, { auth: { persistSession: false } });
+    const { data, error } = await admin.rpc('rate_limit_check', {
+      p_scope: 'chat',
+      p_key: ipHash,
+      p_limit: CHAT_RATE_LIMIT,
+      p_window: CHAT_RATE_WINDOW,
+    });
+    if (error) return true;
+    return data !== false;
+  } catch {
+    return true;
+  }
+}
 
 const SYSTEM = (locale) => `Tu es l'assistant virtuel de ${site.name}, un centre technique automobile spécialisé dans :
 - la reproduction et la programmation de clés auto (mécaniques, transpondeur, smart keys)
@@ -172,6 +213,14 @@ async function currentProviderId() {
 }
 
 export async function POST(request) {
+  const ipHash = clientIpHash(request);
+  if (!(await withinRateLimit(ipHash))) {
+    return Response.json(
+      { error: 'Trop de messages envoyés. Réessayez dans quelques minutes.' },
+      { status: 429 }
+    );
+  }
+
   const providerId = await currentProviderId();
   const provider = PROVIDERS[providerId];
   const apiKey = process.env[provider.envKey];

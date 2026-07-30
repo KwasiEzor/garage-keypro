@@ -45,7 +45,7 @@ export default function Footer() {
     <footer className="relative isolate overflow-hidden bg-navy-950 text-white">
       <div className="absolute -left-32 top-24 h-80 w-80 rounded-full bg-brand/10 blur-[120px]" />
 
-      {/* ————— Newsletter ————— */}
+      {/* ————— Appel à l'action ————— */}
       <div className="container-x relative pt-[clamp(3.5rem,6vw,5rem)]">
         <div className="grid items-center gap-8 rounded-3xl bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950 p-8 shadow-inset ring-1 ring-white/10 sm:p-10 lg:grid-cols-[auto,1fr,auto]">
           <div className="border-white/10 lg:border-r lg:pr-10">
@@ -53,28 +53,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="text-h4 font-bold text-white">{t.footer.newsletterTitle}</p>
+            <p className="text-h4 font-bold text-white">{t.footer.ctaTitle}</p>
             <p className="mt-1 text-small text-white/45">{site.tagline[locale]}</p>
           </div>
 
-          <form
-            className="flex w-full gap-2.5 lg:w-auto"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <label htmlFor="footer-email" className="sr-only">
-              {t.footer.newsletterPlaceholder}
-            </label>
-            <input
-              id="footer-email"
-              type="email"
-              required
-              placeholder={t.footer.newsletterPlaceholder}
-              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-small text-white outline-none transition-colors placeholder:text-white/35 focus:border-brand lg:w-60"
-            />
-            <button type="submit" className="btn-primary btn-sm shrink-0">
-              {t.footer.newsletterButton}
-            </button>
-          </form>
+          <Link href="/contact" className="btn-primary btn-sm shrink-0 lg:w-auto">
+            {t.footer.ctaButton}
+            <IconArrow className="h-4 w-4" />
+          </Link>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IconArrow, IconCheck, IconClose } from '@/components/Icons';
 
 /* ═══════════ En-tête de page ═══════════ */
@@ -204,17 +204,63 @@ export const Cell = ({ children, className = '' }) => (
 );
 
 /* ═══════════ Fenêtre modale ═══════════ */
+//
+// Échap referme la fenêtre et Tab reste piégé à l'intérieur pendant qu'elle
+// est ouverte — sans quoi le focus clavier peut s'échapper vers le reste de
+// la page derrière l'overlay. Utilisée par Devis, Clients et Interventions :
+// un seul correctif ici bénéficie aux cinq écrans qui s'en servent.
 export function Modal({ open, onClose, title, children, wide }) {
+  const dialogRef = useRef(null);
+  const previouslyFocused = useRef(null);
+
+  useEffect(() => {
+    if (open) {
+      previouslyFocused.current = document.activeElement;
+      const id = setTimeout(() => {
+        const first = dialogRef.current?.querySelector(
+          'button:not(:disabled), [href], input, select, textarea'
+        );
+        first?.focus();
+      }, 30);
+      return () => clearTimeout(id);
+    }
+    previouslyFocused.current?.focus?.();
+  }, [open]);
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      onClose();
+      return;
+    }
+    if (e.key !== 'Tab' || !dialogRef.current) return;
+    const focusables = Array.from(
+      dialogRef.current.querySelectorAll('button:not(:disabled), [href], input, select, textarea')
+    );
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   if (!open) return null;
   return (
     <div
       className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-8"
       onClick={onClose}
+      onKeyDown={onKeyDown}
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
       <div
+        ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
         className={`my-auto w-full rounded-2xl bg-white shadow-lift ${wide ? 'max-w-3xl' : 'max-w-xl'}`}
       >
