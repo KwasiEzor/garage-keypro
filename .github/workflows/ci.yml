@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  quality:
+    name: Typecheck · Lint · Tests unitaires · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Vérification des types (fichiers .ts)
+        run: npm run typecheck
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Tests unitaires (Vitest)
+        run: npm test
+
+      - name: Build de production
+        run: npm run build
+
+  e2e:
+    name: Tests de bout en bout (Playwright)
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Installer les navigateurs Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Lancer la suite e2e (build + serveur de prod)
+        run: npm run test:e2e
+        env:
+          CI: true
+          # Facultatif : si présents, l'espace admin affiche le vrai
+          # formulaire de connexion plutôt que l'écran "non configuré".
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Publier le rapport Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  # Suite séparée et volontairement manuelle : elle écrit (puis nettoie)
+  # de vraies lignes dans quote_requests via la clé anonyme. Ne tourne
+  # jamais automatiquement sur une PR externe — seulement à la demande,
+  # et seulement si les secrets Supabase sont configurés sur le dépôt.
+  security:
+    name: Tests de sécurité RLS (manuel)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tests RLS (Supabase)
+        run: npm run test:security
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

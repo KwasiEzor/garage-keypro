@@ -26,6 +26,11 @@ Le site tourne sur **http://localhost:3000**
 | `npm run db:admin` | Crée un compte d'accès au tableau de bord |
 | `npm run db:types` | Régénère les types depuis le schéma de la base |
 | `npm run typecheck` | Vérifie les types (`tsc --noEmit`) |
+| `npm test` | Tests unitaires (Vitest) |
+| `npm run test:e2e` | Tests de bout en bout (Playwright) |
+| `npm run test:all` | typecheck + lint + tests unitaires + build |
+
+> Détail des trois suites de tests (unitaires, e2e, sécurité RLS) et de la CI : [`docs/TESTS.md`](docs/TESTS.md).
 
 > **Après toute modification de `tailwind.config.js`**, arrêtez le serveur (`Ctrl+C`) et relancez `npm run dev` : le cache `.next` doit être régénéré.
 
