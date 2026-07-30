@@ -10,6 +10,14 @@
  * La carte active est mise en valeur (échelle/opacité) selon sa distance à
  * l'index actif — calculée en tenant compte du bouclage, pas seulement de
  * la position brute — pour un rendu identique en boucle continue.
+ *
+ * Invariant important : la navigation (goTo) ne fait défiler QUE la piste
+ * elle-même via track.scrollTo(), jamais element.scrollIntoView(). Ce
+ * dernier peut aussi faire défiler la fenêtre verticalement pour ramener
+ * la carte dans le viewport si le carrousel est hors champ — c'était la
+ * cause d'un vrai bug (la page entière se remettait à défiler toute seule
+ * quand l'automatique tournait pendant que l'utilisateur lisait plus bas).
+ * L'automatique se met aussi en pause quand le carrousel sort du viewport.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -49,9 +57,10 @@ export default function TestimonialsCarousel({ items, locale = 'fr' }) {
   const [focused, setFocused] = useState(false);
   const [recently, setRecently] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [sectionVisible, setSectionVisible] = useState(true);
   const resumeTimer = useRef(null);
 
-  const paused = hovering || focused || recently || hidden || reduced;
+  const paused = hovering || focused || recently || hidden || reduced || !sectionVisible;
 
   // Signale une caméra manuelle (clic, glissement) : coupe l'automatique
   // un moment pour ne pas se battre avec le geste de l'utilisateur.
@@ -91,14 +100,42 @@ export default function TestimonialsCarousel({ items, locale = 'fr' }) {
     return () => io.disconnect();
   }, [n]);
 
+  // Le carrousel lui-même peut être hors champ (l'utilisateur a continué à
+  // lire plus bas sur la page) — l'automatique doit alors se taire, voir
+  // plus bas pourquoi c'est important.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const io = new IntersectionObserver(([entry]) => setSectionVisible(entry.isIntersecting), {
+      threshold: 0.15,
+    });
+    io.observe(track);
+    return () => io.disconnect();
+  }, []);
+
+  // Fait défiler UNIQUEMENT la piste elle-même (jamais la page). On calcule
+  // la position au lieu d'utiliser slide.scrollIntoView({block:'nearest'}) :
+  // ce dernier peut aussi faire défiler la fenêtre verticalement pour
+  // ramener la carte dans le viewport — exactement le bug remonté : dès
+  // que l'utilisateur avait défilé plus bas sur la page (vers le CTA ou le
+  // pied de page), l'automatique tirait la page vers le carrousel toutes
+  // les 6 secondes. scrollTo() sur la piste ne touche jamais la fenêtre.
   const goTo = useCallback(
     (index, { instant = false } = {}) => {
       if (n === 0) return;
+      const track = trackRef.current;
       const wrapped = ((index % n) + n) % n;
-      slideRefs.current[wrapped]?.scrollIntoView({
+      const slide = slideRefs.current[wrapped];
+      if (!track || !slide) return;
+
+      const trackRect = track.getBoundingClientRect();
+      const slideRect = slide.getBoundingClientRect();
+      const slideOffsetWithinTrack = slideRect.left - trackRect.left + track.scrollLeft;
+      const target = slideOffsetWithinTrack - (track.clientWidth - slide.clientWidth) / 2;
+
+      track.scrollTo({
+        left: target,
         behavior: instant || reduced ? 'auto' : 'smooth',
-        inline: 'center',
-        block: 'nearest',
       });
     },
     [n, reduced]
