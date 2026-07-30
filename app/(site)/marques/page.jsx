@@ -1,17 +1,15 @@
 import BrandsClient from './BrandsClient';
 import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: 'Marques',
   description:
     'Spécialiste toutes marques à Lomé : véhicules japonais, européens, américains et chinois. Clés, télécommandes, programmation et diagnostic compatibles avec la majorité des véhicules modernes.',
-  alternates: { canonical: '/marques' },
-  openGraph: {
-    title: 'Toutes marques | KEYPRO SERVICE CENTER',
-    description: 'Japonaises, chinoises, américaines, européennes — un seul spécialiste à Lomé.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
-  },
-};
+  path: '/marques',
+  ogTitle: 'Toutes marques | KEYPRO SERVICE CENTER',
+  ogDescription: 'Japonaises, chinoises, américaines, européennes — un seul spécialiste à Lomé.',
+});
 
 export default function BrandsPage() {
   return (

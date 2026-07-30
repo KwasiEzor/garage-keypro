@@ -1,18 +1,16 @@
 import AboutClient from './AboutClient';
 import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: 'À propos',
   description:
     "KEYPRO SERVICE CENTER : centre technique spécialisé en clés automobiles et électronique embarquée à Agoè-Nyivé, Lomé. Notre méthode, nos valeurs et notre zone d'intervention dans le Grand Lomé.",
-  alternates: { canonical: '/a-propos' },
-  openGraph: {
-    title: 'À propos | KEYPRO SERVICE CENTER',
-    description:
-      "Expertise technique, rapidité et transparence — le centre technique clés auto et électronique de Lomé.",
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
-  },
-};
+  path: '/a-propos',
+  ogTitle: 'À propos | KEYPRO SERVICE CENTER',
+  ogDescription:
+    "Expertise technique, rapidité et transparence — le centre technique clés auto et électronique de Lomé.",
+});
 
 export default function AboutPage() {
   return (

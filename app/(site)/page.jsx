@@ -1,9 +1,10 @@
 import HomeClient from './HomeClient';
 import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata = {
-  alternates: { canonical: '/' },
-};
+export const metadata = pageMetadata({
+  path: '/',
+});
 
 export default function HomePage() {
   return (

@@ -1,17 +1,15 @@
 import ContactClient from './ContactClient';
 import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: 'Contact',
   description:
     "Demandez un devis ou un rendez-vous : formulaire, téléphone, WhatsApp. Atelier à Agoè-Nyivé, Lomé, et assistance mobile dans tout le Grand Lomé.",
-  alternates: { canonical: '/contact' },
-  openGraph: {
-    title: 'Contact | KEYPRO SERVICE CENTER',
-    description: 'Devis gratuit, réponse rapide — atelier ou intervention mobile à Lomé.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
-  },
-};
+  path: '/contact',
+  ogTitle: 'Contact | KEYPRO SERVICE CENTER',
+  ogDescription: 'Devis gratuit, réponse rapide — atelier ou intervention mobile à Lomé.',
+});
 
 export default function ContactPage() {
   return (

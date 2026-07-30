@@ -1,17 +1,15 @@
 import GalleryClient from './GalleryClient';
 import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: 'Galerie',
   description:
     "Photos de l'atelier KEYPRO SERVICE CENTER à Agoè-Nyivé, Lomé : interventions, matériel de diagnostic et de programmation de clés.",
-  alternates: { canonical: '/galerie' },
-  openGraph: {
-    title: 'Galerie | KEYPRO SERVICE CENTER',
-    description: "L'atelier et les interventions en images.",
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
-  },
-};
+  path: '/galerie',
+  ogTitle: 'Galerie | KEYPRO SERVICE CENTER',
+  ogDescription: "L'atelier et les interventions en images.",
+});
 
 export default function GalleryPage() {
   return (

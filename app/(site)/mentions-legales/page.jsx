@@ -1,14 +1,16 @@
 import LegalContent from '@/components/LegalContent';
 import BreadcrumbJsonLd from '@/components/BreadcrumbJsonLd';
 import { images } from '@/lib/images';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: 'Mentions légales',
   description:
     'Éditeur du site, hébergement, propriété intellectuelle et crédits du site KEYPRO SERVICE CENTER.',
-  alternates: { canonical: '/mentions-legales' },
+  path: '/mentions-legales',
+  ogTitle: 'Mentions légales | KEYPRO SERVICE CENTER',
   robots: { index: true, follow: true },
-};
+});
 
 export default function LegalNoticePage() {
   return (
