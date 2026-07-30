@@ -1,16 +1,11 @@
-import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import Chatbot from '@/components/ChatbotLazy';
 import CookieNotice from '@/components/CookieNotice';
 import ScrollToTop from '@/components/ScrollToTop';
 import { ScrollProgress } from '@/components/motion';
 import { site } from '@/lib/site';
-
-// Masqué par défaut (site.showChatbot) et jamais nécessaire au premier
-// rendu : chargé à la demande plutôt qu'inclus dans le bundle initial de
-// chaque page publique.
-const Chatbot = dynamic(() => import('@/components/Chatbot'), { ssr: false });
 
 /**
  * Habillage du site public. Le tableau de bord ne passe pas par ici.
