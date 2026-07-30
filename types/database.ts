@@ -166,17 +166,20 @@ export type Database = {
         Row: {
           address: Json; business_name: string; country_code: string; currency: string;
           default_locale: string; email: string; geo: Json; hours: Json; id: boolean;
-          phones: string[]; social: Json; timezone: string; updated_at: string; whatsapp: string;
+          phones: string[]; show_chatbot: boolean; show_whatsapp_button: boolean; social: Json;
+          timezone: string; updated_at: string; whatsapp: string;
         };
         Insert: {
           address?: Json; business_name?: string; country_code?: string; currency?: string;
           default_locale?: string; email: string; geo?: Json; hours?: Json; id?: boolean;
-          phones?: string[]; social?: Json; timezone?: string; updated_at?: string; whatsapp: string;
+          phones?: string[]; show_chatbot?: boolean; show_whatsapp_button?: boolean; social?: Json;
+          timezone?: string; updated_at?: string; whatsapp: string;
         };
         Update: {
           address?: Json; business_name?: string; country_code?: string; currency?: string;
           default_locale?: string; email?: string; geo?: Json; hours?: Json; id?: boolean;
-          phones?: string[]; social?: Json; timezone?: string; updated_at?: string; whatsapp?: string;
+          phones?: string[]; show_chatbot?: boolean; show_whatsapp_button?: boolean; social?: Json;
+          timezone?: string; updated_at?: string; whatsapp?: string;
         };
         Relationships: [];
       };

@@ -110,7 +110,7 @@ Trois sections, réunies sur `/admin/parametres` :
 
 - **Équipe** — la liste des personnes autorisées à ouvrir le tableau de bord. Le responsable (`owner`) peut y ajouter un nouveau membre (e-mail, mot de passe provisoire, rôle), changer le rôle de quelqu'un, ou lui retirer l'accès. Un membre `staff` voit la liste sans pouvoir la modifier.
 - **Mon compte** — chaque personne connectée peut y changer son propre mot de passe.
-- **Préférences générales** — devise, fuseau horaire et langue par défaut du site (utilisée quand le navigateur d'un visiteur n'indique ni français ni anglais).
+- **Préférences générales** — devise, fuseau horaire, langue par défaut du site (utilisée quand le navigateur d'un visiteur n'indique ni français ni anglais), et les deux boutons flottants (**WhatsApp**, **assistant IA**) : décocher les retire complètement du site, pas seulement en apparence.
 
 ---
 

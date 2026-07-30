@@ -253,12 +253,14 @@ function Preferences({ settings, supabase, refresh }) {
     currency: settings?.currency || 'FCFA',
     timezone: settings?.timezone || 'Africa/Lome',
     default_locale: settings?.default_locale || 'fr',
+    show_whatsapp_button: settings?.show_whatsapp_button ?? true,
+    show_chatbot: settings?.show_chatbot ?? true,
   });
 
   return (
     <Panel
       title="Préférences générales"
-      description="Devise, fuseau horaire et langue par défaut du site."
+      description="Devise, fuseau horaire, langue par défaut et boutons flottants du site."
     >
       <div className="grid gap-5 sm:grid-cols-3">
         <Field label="Devise" hint="Utilisée dans le tableau de bord (montants des interventions).">
@@ -292,6 +294,33 @@ function Preferences({ settings, supabase, refresh }) {
         </Field>
       </div>
 
+      <div className="mt-6 border-t border-navy-100 pt-6">
+        <span className="label">Boutons flottants du site public</span>
+        <div className="mt-3 space-y-3">
+          <label className="flex items-center gap-2.5 text-small font-medium text-navy-700">
+            <input
+              type="checkbox"
+              checked={s.show_whatsapp_button}
+              onChange={(e) => setS({ ...s, show_whatsapp_button: e.target.checked })}
+              className="h-4 w-4 accent-brand"
+            />
+            Bouton WhatsApp
+          </label>
+          <label className="flex items-center gap-2.5 text-small font-medium text-navy-700">
+            <input
+              type="checkbox"
+              checked={s.show_chatbot}
+              onChange={(e) => setS({ ...s, show_chatbot: e.target.checked })}
+              className="h-4 w-4 accent-brand"
+            />
+            Assistant IA (chatbot)
+          </label>
+        </div>
+        <p className="mt-2.5 text-[11px] text-navy-400">
+          Décochez pour retirer complètement le bouton du site — pas seulement le masquer.
+        </p>
+      </div>
+
       <div className="mt-5">
         <SaveButton
           onSave={async () => {
@@ -301,6 +330,8 @@ function Preferences({ settings, supabase, refresh }) {
                 currency: s.currency,
                 timezone: s.timezone,
                 default_locale: s.default_locale,
+                show_whatsapp_button: s.show_whatsapp_button,
+                show_chatbot: s.show_chatbot,
               })
               .eq('id', true);
             if (!error) refresh();

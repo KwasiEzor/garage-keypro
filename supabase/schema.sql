@@ -75,6 +75,10 @@ create table if not exists public.settings (
   currency      text        not null default 'FCFA',
   timezone      text        not null default 'Africa/Lome',
   default_locale text       not null default 'fr' check (default_locale in ('fr','en')),
+  -- Boutons flottants du site public, à masquer ou réafficher depuis
+  -- /admin/parametres sans toucher au code.
+  show_whatsapp_button boolean not null default true,
+  show_chatbot         boolean not null default true,
   updated_at    timestamptz not null default now(),
   constraint settings_singleton check (id)
 );
