@@ -314,7 +314,7 @@ export default function ContactClient() {
 
                 <div className="flex flex-wrap gap-3 pt-1 sm:col-span-2">
                   <button type="submit" disabled={sending} className="btn-primary disabled:opacity-60">
-                    {sending ? (locale === 'fr' ? 'Envoi…' : 'Sending…') : c.submit}
+                    {sending ? c.submitting : c.submit}
                     {!sending && <IconArrow className="h-4 w-4" />}
                   </button>
                   <button
