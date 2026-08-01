@@ -1,6 +1,6 @@
 # KEYPRO SERVICE CENTER
 
-Site vitrine du garage **KEYPRO SERVICE CENTER** — Agoè-Nyivé, Lomé (Togo).
+Site vitrine du garage **KEYPRO SERVICE CENTER** — Adjidogomé Boukarou, Lomé (Togo).
 Clés auto, programmation, diagnostic électronique et assistance mobile dans tout le Grand Lomé.
 
 **Next.js** (App Router) · **Tailwind CSS** · **Supabase** typé · bilingue **FR/EN** · carte interactive · animations au défilement · chatbot · **tableau de bord d'administration**.
@@ -132,7 +132,7 @@ public/
 
 Sept points à finaliser avant la mise en ligne :
 
-1. **Coordonnées GPS exactes** — le marqueur pointe vers le centre d'Agoè-Nyivé, pas vers l'atelier. Voir [`docs/CONTENU.md`](docs/CONTENU.md#placer-le-marqueur-sur-la-carte).
+1. **Coordonnées GPS exactes** — le marqueur pointe vers le centre d'Agoè-Nyivé (repère précédent, zone voisine), pas vers l'atelier à Adjidogomé Boukarou. Voir [`docs/CONTENU.md`](docs/CONTENU.md#placer-le-marqueur-sur-la-carte).
 2. **Liens des réseaux sociaux** — les `#` dans `lib/site.js` sont des espaces réservés.
 3. **Vraies photos de l'atelier** — les visuels actuels viennent d'Unsplash. Voir [`docs/CONTENU.md`](docs/CONTENU.md#remplacer-les-photos).
 4. **Compte administrateur** — `npm run db:admin` n'a pas encore été lancé.

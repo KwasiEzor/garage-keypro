@@ -44,7 +44,7 @@ export const metadata = {
     template: `%s | ${site.name}`,
   },
   description:
-    "Centre technique à Agoè-Nyivé, Lomé (Togo), spécialisé en clés automobiles, programmation, diagnostic électronique et assistance mobile. Toutes marques : japonaises, européennes, américaines, chinoises.",
+    "Centre technique à Adjidogomé Boukarou, Lomé (Togo), spécialisé en clés automobiles, programmation, diagnostic électronique et assistance mobile. Toutes marques : japonaises, européennes, américaines, chinoises.",
   keywords: [
     'clé auto Lomé',
     'programmation clé voiture Togo',
@@ -53,7 +53,7 @@ export const metadata = {
     'télécommande voiture Togo',
     'assistance automobile mobile Lomé',
     'serrurier auto Togo',
-    'garage Agoè-Nyivé',
+    'garage Adjidogomé',
     'KEYPRO Service Center',
   ],
   openGraph: {
@@ -68,7 +68,7 @@ export const metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: `${site.name} — Agoè-Nyivé, Lomé`,
+        alt: `${site.name} — Adjidogomé Boukarou, Lomé`,
       },
     ],
   },

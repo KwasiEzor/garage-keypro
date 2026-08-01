@@ -20,7 +20,7 @@ Fichier : **`lib/site.js`**
 
 ```js
 export const site = {
-  email: 'garagelaredemption@gmail.com',
+  email: 'keyproservicecenter@gmail.com',
   countryCode: '+228',                              // indicatif du Togo
   phones: ['72 11 44 44', '98 48 88 44', '22 46 66 26'],
   whatsapp: '22872114444',                          // international, sans le +
@@ -43,11 +43,11 @@ whatsapp: '22898488844',
 
 ```js
 address: {
-  street: 'Agoè-Nyivé',
+  street: 'Adjidogomé Boukarou',
   city: 'Lomé',
-  region: 'Golfe / Agoè-Nyivé',
+  region: 'Golfe / Adjidogomé',
   country: { fr: 'Togo', en: 'Togo' },
-  full:  { fr: 'Agoè-Nyivé, Lomé — Togo', en: 'Agoè-Nyivé, Lomé — Togo' },
+  full:  { fr: 'Adjidogomé Boukarou, Lomé — Togo', en: 'Adjidogomé Boukarou, Lomé — Togo' },
   short: { fr: 'Lomé, Togo', en: 'Lomé, Togo' },
 },
 ```
@@ -96,7 +96,7 @@ Les icônes restent visibles même avec `#` — pensez à les renseigner avant l
 
 ## Placer le marqueur sur la carte
 
-Les coordonnées actuelles pointent vers le **centre d'Agoè-Nyivé**, pas vers l'atelier. C'est une approximation à corriger.
+Les coordonnées actuelles pointent vers le **centre d'Agoè-Nyivé** (repère précédent, une zone voisine), pas vers l'atelier à Adjidogomé Boukarou. C'est une approximation à corriger.
 
 ```js
 geo: {
@@ -199,8 +199,8 @@ Les photos actuelles viennent d'Unsplash (licence gratuite, usage commercial aut
 heroWorkshop: {
   src: '/photos/atelier-principal.jpg',       // au lieu de U('photo-…')
   alt: {
-    fr: 'Notre atelier à Agoè-Nyivé',
-    en: 'Our workshop in Agoè-Nyivé',
+    fr: 'Notre atelier à Adjidogomé Boukarou',
+    en: 'Our workshop in Adjidogomé Boukarou',
   },
   credit: 'KEYPRO Service Center',
 },

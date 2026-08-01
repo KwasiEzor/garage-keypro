@@ -5,7 +5,7 @@ import { pageMetadata } from '@/lib/seo';
 export const metadata = pageMetadata({
   title: 'Galerie',
   description:
-    "Photos de l'atelier KEYPRO SERVICE CENTER à Agoè-Nyivé, Lomé : interventions, matériel de diagnostic et de programmation de clés.",
+    "Photos de l'atelier KEYPRO SERVICE CENTER à Adjidogomé Boukarou, Lomé : interventions, matériel de diagnostic et de programmation de clés.",
   path: '/galerie',
   ogTitle: 'Galerie | KEYPRO SERVICE CENTER',
   ogDescription: "L'atelier et les interventions en images.",
