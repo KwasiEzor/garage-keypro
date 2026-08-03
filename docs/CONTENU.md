@@ -96,12 +96,12 @@ Les icônes restent visibles même avec `#` — pensez à les renseigner avant l
 
 ## Placer le marqueur sur la carte
 
-Les coordonnées actuelles pointent vers le **centre d'Agoè-Nyivé** (repère précédent, une zone voisine), pas vers l'atelier à Adjidogomé Boukarou. C'est une approximation à corriger.
+Les coordonnées ci-dessous sont celles, exactes, de l'atelier à Adjidogomé Boukarou (fournies par le client).
 
 ```js
 geo: {
-  lat: 6.2094,
-  lng: 1.2069,
+  lat: 6.175450,
+  lng: 1.177399,
   zoom: 14,
 },
 ```

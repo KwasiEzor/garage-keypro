@@ -130,15 +130,16 @@ public/
 
 ## Ce qui reste à faire
 
-Sept points à finaliser avant la mise en ligne :
+Six points à finaliser avant la mise en ligne :
 
-1. **Coordonnées GPS exactes** — le marqueur pointe vers le centre d'Agoè-Nyivé (repère précédent, zone voisine), pas vers l'atelier à Adjidogomé Boukarou. Voir [`docs/CONTENU.md`](docs/CONTENU.md#placer-le-marqueur-sur-la-carte).
-2. **Liens des réseaux sociaux** — les `#` dans `lib/site.js` sont des espaces réservés.
-3. **Vraies photos de l'atelier** — les visuels actuels viennent d'Unsplash. Voir [`docs/CONTENU.md`](docs/CONTENU.md#remplacer-les-photos).
-4. **Compte administrateur** — `npm run db:admin` n'a pas encore été lancé.
-5. **Protection contre les mots de passe compromis** — à activer dans Supabase, deux clics. Voir [`docs/TABLEAU-DE-BORD.md`](docs/TABLEAU-DE-BORD.md#ce-qui-reste-à-faire-côté-supabase).
-6. **Nom de domaine définitif** — une fois choisi, mettez à jour `BASE_URL` dans `app/sitemap.js` et `app/robots.js`, et `metadataBase` dans `app/layout.jsx`. Voir [`docs/CONFORMITE.md`](docs/CONFORMITE.md#après-la-mise-en-ligne).
-7. **Mentions légales — hébergeur** — la page `/mentions-legales` cite Vercel ou Netlify au conditionnel ; retirez l'option non retenue une fois l'hébergement choisi. Voir [`docs/CONFORMITE.md`](docs/CONFORMITE.md#ce-qui-reste-à-faire-manuellement).
+1. **Liens des réseaux sociaux** — les `#` dans `lib/site.js` sont des espaces réservés.
+2. **Vraies photos de l'atelier** — les visuels actuels viennent d'Unsplash. Voir [`docs/CONTENU.md`](docs/CONTENU.md#remplacer-les-photos).
+3. **Compte administrateur** — `npm run db:admin` n'a pas encore été lancé.
+4. **Protection contre les mots de passe compromis** — à activer dans Supabase, deux clics. Voir [`docs/TABLEAU-DE-BORD.md`](docs/TABLEAU-DE-BORD.md#ce-qui-reste-à-faire-côté-supabase).
+5. **Nom de domaine définitif** — une fois choisi, mettez à jour `BASE_URL` dans `app/sitemap.js` et `app/robots.js`, et `metadataBase` dans `app/layout.jsx`. Voir [`docs/CONFORMITE.md`](docs/CONFORMITE.md#après-la-mise-en-ligne).
+6. **Mentions légales — hébergeur** — la page `/mentions-legales` cite Vercel ou Netlify au conditionnel ; retirez l'option non retenue une fois l'hébergement choisi. Voir [`docs/CONFORMITE.md`](docs/CONFORMITE.md#ce-qui-reste-à-faire-manuellement).
+
+✅ Les coordonnées GPS exactes de l'atelier (Adjidogomé Boukarou) sont renseignées.
 
 ---
 

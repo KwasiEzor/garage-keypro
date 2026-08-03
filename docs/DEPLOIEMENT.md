@@ -4,9 +4,9 @@
 
 ## Avant de publier
 
-Cochez ces points — les trois premiers sont des espaces réservés à corriger impérativement.
+Cochez ces points — les deux premiers sont des espaces réservés à corriger impérativement.
 
-- [ ] **Coordonnées GPS exactes** de l'atelier dans `lib/site.js` → `geo` (voir [`CONTENU.md`](CONTENU.md#placer-le-marqueur-sur-la-carte))
+- [x] **Coordonnées GPS exactes** de l'atelier dans `lib/site.js` → `geo`
 - [ ] **Liens des réseaux sociaux** dans `lib/site.js` → `social` (actuellement des `#`)
 - [ ] **Vraies photos** de l'atelier dans `lib/images.js` (actuellement Unsplash)
 - [ ] `metadataBase` dans `app/layout.jsx` **et** `BASE_URL` dans `app/sitemap.js` et `app/robots.js` pointent vers le vrai domaine
