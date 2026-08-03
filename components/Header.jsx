@@ -135,7 +135,7 @@ export default function Header() {
             <Logo
               theme="color"
               className={`w-auto transition-all duration-500 ease-smooth ${
-                scrolled ? 'h-10' : 'h-12'
+                scrolled ? 'h-12' : 'h-14'
               }`}
             />
           </Link>
