@@ -144,7 +144,7 @@ export default function Header() {
                 scrolled ? 'text-[15px]' : 'text-[17px]'
               }`}
             >
-              <span className="tracking-tight">Keypro</span>
+              <span className="tracking-tight text-brand">Keypro</span>
               <span className="text-[0.7em] tracking-[0.08em] text-navy-500">
                 Service Center
               </span>
