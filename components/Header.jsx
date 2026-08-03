@@ -131,24 +131,13 @@ export default function Header() {
             scrolled ? 'h-[68px]' : 'h-[84px]'
           }`}
         >
-          <Link href="/" aria-label={site.name} className="flex shrink-0 items-center gap-3">
+          <Link href="/" aria-label={site.name} className="shrink-0">
             <Logo
               theme="color"
-              decorative
               className={`w-auto transition-all duration-500 ease-smooth ${
-                scrolled ? 'h-8' : 'h-10'
+                scrolled ? 'h-10' : 'h-12'
               }`}
             />
-            <span
-              className={`hidden flex-col leading-[1.05] font-heading font-bold uppercase text-navy-900 sm:flex transition-all duration-500 ease-smooth ${
-                scrolled ? 'text-[15px]' : 'text-[17px]'
-              }`}
-            >
-              <span className="tracking-tight text-brand">Keypro</span>
-              <span className="text-[0.7em] tracking-[0.08em] text-navy-500">
-                Service Center
-              </span>
-            </span>
           </Link>
 
           <nav className="hidden items-center gap-0.5 lg:flex">
